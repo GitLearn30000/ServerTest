@@ -744,6 +744,7 @@ def CatMeow(ipAddr):
     print(all52)
     print(allPowerServer[0])
     print(z)
+    os.system("rm *.txt")
     updateWINTo2(x, z, MeowSP)
     
 
