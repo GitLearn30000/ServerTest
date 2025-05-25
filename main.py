@@ -30,8 +30,8 @@ def CatMeow(ipAddr):
     #------------------------------------------------------------------------------
     #тут редактировать обработку Json для RedFish
     
-    # Загрузка данных из файла meow.json
-    with open('meow.json', 'r', encoding='utf-8') as file:
+    # Загрузка данных из файла paths.json
+    with open('paths.json', 'r', encoding='utf-8') as file:
         MeoW0data = json.load(file)
 
     # Инициализация пустых списков для хранения значений
@@ -350,7 +350,7 @@ def CatMeow(ipAddr):
         print((SENSOR_NAME_LIST))
         return all59
     #all5 = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
-    # Загрузка данных из файла meow.json
+    # Загрузка данных из файла paths.json
     
     
     def funct5():
@@ -718,11 +718,11 @@ def CatMeow(ipAddr):
             "redfishPath": parts[2]
         })
 
-    # Сохраняем в файл meow.json
-    with open("meow.json", "w", encoding="utf-8") as f:
+    # Сохраняем в файл paths.json
+    with open("paths.json", "w", encoding="utf-8") as f:
         json.dump(result, f, indent=4)
 
-    print("Данные успешно сохранены в meow.json")'''
+    print("Данные успешно сохранены в paths.json")'''
     #print(all5SP)
     #print(end_dict)
     print(SENSOR_NAME_LIST)
