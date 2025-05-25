@@ -1,0 +1,386 @@
+[
+    {
+        "PowerState": "on",
+        "sensorName": "SIL_STS4_TMP",
+        "dbusPath": "busctl get-property xyz.openbmc_project.PLDM /xyz/openbmc_project/sensors/temperature/SIL_STS4_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "SIL_ACC100_A_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/SIL_ACC100_A_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "SIL_ACC100_E_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/SIL_ACC100_E_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "SIL_ACC100_W_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/SIL_ACC100_W_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "3V_BAT_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/3V_BAT_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCIO_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/CPU1_PVCCIO_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "P12V_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/P12V_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "P1V05_PCH_AX_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/P1V05_PCH_AX_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "P1V8_PCH_AX_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/P1V8_PCH_AX_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "P3V3_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/P3V3_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVNN_PCH_AX_VLT",
+        "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/PVNN_PCH_AX_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN1_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_pwm/SYS_FAN1_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN2_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_pwm/SYS_FAN2_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN5_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_pwm/SYS_FAN5_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN6_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_pwm/SYS_FAN6_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN1_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN1_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN2_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN2_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN5_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN5_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "SYS_FAN6_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN6_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "AQFPB_FFC_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.HwmonTempSensor /xyz/openbmc_project/sensors/temperature/AQFPB_FFC_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "AQRZ2_U4P1_R_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.HwmonTempSensor /xyz/openbmc_project/sensors/temperature/AQRZ2_U4P1_R_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "TEMP1_OUT_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.HwmonTempSensor /xyz/openbmc_project/sensors/temperature/TEMP1_OUT_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "TEMP2_IN_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.HwmonTempSensor /xyz/openbmc_project/sensors/temperature/TEMP2_IN_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_DTS_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/CPU1_DTS_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_A_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_A_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_B_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_B_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_C_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_C_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_D_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_D_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_E_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_E_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_F_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_F_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_G_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_G_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "DDR4_H_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.IntelCPUSensor /xyz/openbmc_project/sensors/temperature/DDR4_H_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_IN_AMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/current/PSU1_IN_AMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_OUT_AMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/current/PSU1_OUT_AMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_IN_AMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/current/PSU2_IN_AMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_OUT_AMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/current/PSU2_OUT_AMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_FAN_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/fan_pwm/PSU1_FAN_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_FAN_PWM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/fan_pwm/PSU2_FAN_PWM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_FAN_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/fan_tach/PSU1_FAN_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_FAN_RPM",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/fan_tach/PSU2_FAN_RPM xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_IN_PWR",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/power/PSU1_IN_PWR xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_OUT_PWR",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/power/PSU1_OUT_PWR xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_IN_PWR",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/power/PSU2_IN_PWR xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_OUT_PWR",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/power/PSU2_OUT_PWR xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_P1V8_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/CPU1_P1V8_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCIN_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/CPU1_PVCCIN_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCIO_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/CPU1_PVCCIO_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_IN_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/PSU1_IN_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_IN_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/PSU2_IN_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVDDQ_ABCD_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/PVDDQ_ABCD_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVDDQ_EFGH_TMP",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/temperature/PVDDQ_EFGH_TMP xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_P1V8_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/CPU1_P1V8_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCANA_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/CPU1_PVCCANA_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCIN_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/CPU1_PVCCIN_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "CPU1_PVCCSA_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/CPU1_PVCCSA_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_IN_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU1_IN_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU1_OUT_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU1_OUT_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_IN_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU2_IN_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU2_OUT_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU2_OUT_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVDDQ_ABCD_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PVDDQ_ABCD_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVDDQ_EFGH_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PVDDQ_EFGH_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVPP_ABCD_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PVPP_ABCD_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT"
+    },
+    {
+        "PowerState": "on",
+        "sensorName": "PVPP_EFGH_VLT",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PVPP_EFGH_VLT xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT"
+    },
+    {
+        "PowerState": "off",
+        "sensorName": "PSU_TTL_OUT_PWR",
+        "dbusPath": "busctl get-property     xyz.openbmc_project.VirtualSensor /xyz/openbmc_project/sensors/power/PSU_TTL_OUT_PWR xyz.openbmc_project.Sensor.Value Value",
+        "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR"
+    }
+]
