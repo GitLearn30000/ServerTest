@@ -790,30 +790,65 @@ class ItemSelector(QWidget):
         for item in self.items:
             list_item = QListWidgetItem(item)
 
-            # Найдём связанный текст из meow_list, где содержится имя item
+            # 🔄 Словарь замен имён "AQRZ2-U4P1-R","AQRZ2_U4P1_R"
+            item_replacements = {
+                "AQRZ2_U4P1_R": "AQRZ2-U4P1-R",
+                "AQFPB_FFC": "AQFPB-FFC",
+                # Добавьте нужные замены
+            }
+
+            # 🔄 Словарь замен имён (если нужно — можно вынести в init или отдельный метод)
+            
+
+            # 🆗 Создаём заменённое имя для анализа, не меняя оригинал
+            lookup_item = item_replacements.get(item, item)
+
+            # 🔍 Найдём связанный текст из meow_list, где содержится заменённое имя
             related_meow_lines = [
                 line for line in self.meow_list
-                if item in line
+                if lookup_item in line
             ]
 
-            # Проверим наличие строки "ERROR : NoData" в найденных строках
+            # Проверим наличие строки "ERROR : NoData" в найденных строках (без учёта регистра)
             is_meow_error = any("ERROR : NoData" in line for line in related_meow_lines)
 
-            has_data = any(item in values for values in self.options_dict.values())
+            # Печатаем строки, которые анализируем
+            print("🔍 Проверяем строки:")
+            for line in related_meow_lines:
+                print(f" → {line}")
+
+            # Проверка наличия данных по заменённому имени
+            # Проверка наличия данных по заменённому имени и игнор ошибок "NoData" в ключе
+            has_data = any(
+                item in values and "NoData" not in key
+                for key, values in self.options_dict.items()
+            )
+
+
+            # Печатаем результат промежуточных проверок
+            print(f"⚠️ Найдена ошибка (ERROR : NoData): {is_meow_error}")
+            print(f"📊 Есть данные (has_data): {has_data}")
+
+            # Устанавливаем флаги и внешний вид
             list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
 
             if is_meow_error:
-                list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)  # Заблокировать
+                print("🚫 Элемент отключён из-за ошибки")
+                list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)  
                 list_item.setForeground(QColor("red"))
                 list_item.setCheckState(Qt.Unchecked)
-            elif not has_data:
-                list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
-                list_item.setForeground(QColor("red"))
-                list_item.setCheckState(Qt.Unchecked)
+            
             else:
+                print("✅ Элемент доступен для выбора")
                 list_item.setCheckState(Qt.Unchecked)
 
+            # Печать добавляемого элемента
+            print(f"➕ Добавлен элемент в список: {list_item.text()}\n")
+
+            # Добавляем в list_widget
             self.list_widget.addItem(list_item)
+
+
 
         left_split.addWidget(self.list_widget)
 
