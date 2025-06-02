@@ -92,6 +92,7 @@ def CatMeow(ipAddr):
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
     MeowOn()
+    ProgressMeow(1)
     SENSOR_NAME_LIST = OmeowDoSensor
     end_dict = {}
     def funct0():
@@ -660,7 +661,7 @@ def CatMeow(ipAddr):
     
     
     ExtraGAV = []
-    ProgressMeow(1)
+    
     ProgressMeow(2)
     ProgressMeow(3)
     ProgressMeow(4)
@@ -745,6 +746,7 @@ def CatMeow(ipAddr):
     print(allPowerServer[0])
     print(z)
     os.system("rm *.txt")
+    MeowSP = MeowSP +["SERVER is "+str(serverstate)]
     updateWINTo2(x, z, MeowSP)
     
 
@@ -832,7 +834,7 @@ class ItemSelector(QWidget):
             # Устанавливаем флаги и внешний вид
             list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
 
-            if is_meow_error:
+            if is_meow_error and not has_data:
                 print("🚫 Элемент отключён из-за ошибки")
                 list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)  
                 list_item.setForeground(QColor("red"))
@@ -851,13 +853,15 @@ class ItemSelector(QWidget):
 
 
         left_split.addWidget(self.list_widget)
+        print(meow_list[len(meow_list)-1])
 
         # IP секция
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
         ip_layout.setContentsMargins(0, 0, 0, 0)
-
+        
         self.ip_label = QLabel("Выберите или введите IP-адрес:")
+
         
         # Создание выпадающего списка для ввода IP-адреса
         self.ip_combo = QComboBox(self)
@@ -876,6 +880,8 @@ class ItemSelector(QWidget):
         self.buttons_layout = QHBoxLayout()  # Горизонтальный layout для кнопок
         self.green_button = QPushButton("ВКЛ")
         self.red_button = QPushButton("ВЫКЛ")
+        self.i1p_label = QLabel(meow_list[len(meow_list)-1])
+        
         self.green_button.setStyleSheet("background-color: green; color: white;")
         self.red_button.setStyleSheet("background-color: red; color: white;")
 
@@ -899,12 +905,14 @@ class ItemSelector(QWidget):
         self.ip_combo.currentTextChanged.connect(self.update_ip_input_from_combo)
 
         ip_layout.addWidget(self.ip_label)
+        
         ip_layout.addWidget(self.ip_combo)  # Добавляем комбобокс вместо поля ввода
         ip_layout.addWidget(self.ip_input)  # Оставляем поле ввода для новых IP
         ip_layout.addWidget(self.confirm_button)
 
         # Добавляем кнопки
         ip_layout.addLayout(self.buttons_layout)
+        ip_layout.addWidget(self.i1p_label)
 
         # Размещение в левом разделе (если он есть)
         left_split.addWidget(ip_section)
