@@ -726,10 +726,10 @@ def CatMeow(ipAddr):
     print("Данные успешно сохранены в paths.json")'''
     #print(all5SP)
     #print(end_dict)
-    print(SENSOR_NAME_LIST)
-    print(DebugList)
+    #print(SENSOR_NAME_LIST)
+    #print(DebugList)
     
-    print(allSDR)
+    #print(allSDR)
     #print("Extra: ",ExtraGAV)#HEATER_TEMP
     #print("HEATER_TEMP FISH: ",ExtraGAV[0])
     #print("HEATER_TEMP BUS: ",ExtraGAV[1])
@@ -742,11 +742,11 @@ def CatMeow(ipAddr):
     #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
     #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
     #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
-    print(all52)
-    print(allPowerServer[0])
-    print(z)
+    #print(all52)
+    #print(allPowerServer[0])
+    #print(z)
     os.system("rm *.txt")
-    MeowSP = MeowSP +["SERVER is "+str(serverstate)]
+    MeowSP = MeowSP +["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, MeowSP)
     
 
@@ -834,7 +834,7 @@ class ItemSelector(QWidget):
             # Устанавливаем флаги и внешний вид
             list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
 
-            if is_meow_error and not has_data:
+            if is_meow_error:
                 print("🚫 Элемент отключён из-за ошибки")
                 list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)  
                 list_item.setForeground(QColor("red"))
@@ -880,7 +880,63 @@ class ItemSelector(QWidget):
         self.buttons_layout = QHBoxLayout()  # Горизонтальный layout для кнопок
         self.green_button = QPushButton("ВКЛ")
         self.red_button = QPushButton("ВЫКЛ")
-        self.i1p_label = QLabel(meow_list[len(meow_list)-1])
+        # Обработка статуса и IP
+        def turn_on(self):
+            global ipAddr
+            print(f"Включение устройства с IP: {ipAddr}")
+            # Замените на вашу команду для включения
+            os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power on")
+
+        def turn_off(self):
+            global ipAddr
+            print(f"Выключение устройства с IP: {ipAddr}")
+            # Замените на вашу команду для выключения
+            os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
+        # Предположим, это у тебя внутри класса (например, в `__init__` или методе)
+        last_status_full = meow_list[-1]
+        parts = last_status_full.strip().split()
+        ip = parts[-1]
+        status = ' '.join(parts[:-1])
+        print("IP-адрес:", ip)
+
+        self.server_ip = ip
+        self.current_status = 'on' if status == 'SERVER is on' else 'off'
+
+        self.i1p_label = QLabel()
+        self.i1p_label.setCursor(QCursor(Qt.PointingHandCursor))
+
+        def update_label():
+            if self.current_status == 'on':
+                icon_path = "ServerIsOn.png"
+                status_text = "SERVER is on"
+            else:
+                icon_path = "ServerIsOff.png"
+                status_text = "SERVER is off"
+
+            # HTML с увеличенной иконкой (60x60)
+            html = f'''
+                <span>
+                    <img src="{icon_path}" width="60" height="60" style="vertical-align: middle;">
+                    <span style="font-size:60px; color:{'green' if self.current_status == 'on' else 'gray'};"> {status_text}</span>
+                </span>
+            '''
+            self.i1p_label.setText(html)
+
+        update_label()
+
+
+        def handle_label_click(event):
+            if self.current_status == 'on':
+                turn_off(self.server_ip)
+                self.current_status = 'off'
+            else:
+                turn_on(self.server_ip)
+                self.current_status = 'on'
+            update_label()
+
+        self.i1p_label.mousePressEvent = handle_label_click
+
+
         
         self.green_button.setStyleSheet("background-color: green; color: white;")
         self.red_button.setStyleSheet("background-color: red; color: white;")
