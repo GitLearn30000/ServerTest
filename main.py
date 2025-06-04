@@ -1,13 +1,14 @@
 import os
 import sys
 import math
+import subprocess
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 #10.12.140.137
-def CatMeow(ipAddr):
+def StartProgramm(ipAddr):
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
         if os.path.exists(filename):
             os.remove(filename)
@@ -32,12 +33,12 @@ def CatMeow(ipAddr):
     
     # Загрузка данных из файла paths.json
     with open('paths.json', 'r', encoding='utf-8') as file:
-        MeoW0data = json.load(file)
+        GetDataFromFile = json.load(file)
 
     # Инициализация пустых списков для хранения значений
-    MeoW0MEowNotMore = []
-    OmeowDoSensor = []
-    DBUSMEOWLINK = []
+    RedFishQwery_SP = []
+    SensorNames = []
+    DBusQwery_SP = []
     StateServer = []
     serverstate = ""
     if "is on" in allPowerServer[0]:
@@ -48,52 +49,52 @@ def CatMeow(ipAddr):
     stateMyServer = serverstate  # Замените на "on" для тестирования другого состояния
 
     # Функция для рекурсивного поиска значений
-    def MeoW0extract_paths(MeoW0current_data):
-        if isinstance(MeoW0current_data, dict):
+    def FilePathsData(current_data):
+        if isinstance(current_data, dict):
             # Проверяем наличие нужных ключей в самом словаре
-            if "PowerState" in MeoW0current_data:
-                power_state = MeoW0current_data["PowerState"]
+            if "PowerState" in current_data:
+                power_state = current_data["PowerState"]
                 if stateMyServer == "off" and power_state == "off":
-                    add_values(MeoW0current_data)  # Добавляем только данные с PowerState "off"
+                    add_values(current_data)  # Добавляем только данные с PowerState "off"
                 elif stateMyServer == "on":
-                    add_values(MeoW0current_data)  # Добавляем все данные при "on"
+                    add_values(current_data)  # Добавляем все данные при "on"
             else:
                 # Если ключа "PowerState" нет, продолжаем рекурсивный вызов
-                for MeoW0key, MeoW0value in MeoW0current_data.items():
-                    MeoW0extract_paths(MeoW0value)
-        elif isinstance(MeoW0current_data, list):
-            for MeoW0item in MeoW0current_data:
-                MeoW0extract_paths(MeoW0item)
+                for keyData, ValueData in current_data.items():
+                    FilePathsData(ValueData)
+        elif isinstance(current_data, list):
+            for itemData in current_data:
+                FilePathsData(itemData)
 
     # Функция для добавления значений в списки
     def add_values(data):
         if "redfishPath" in data:
-            MeoW0MEowNotMore.append(data["redfishPath"])
+            RedFishQwery_SP.append(data["redfishPath"])
         if "sensorName" in data:
-            OmeowDoSensor.append(data["sensorName"])
+            SensorNames.append(data["sensorName"])
         if "dbusPath" in data:
-            DBUSMEOWLINK.append(data["dbusPath"])
+            DBusQwery_SP.append(data["dbusPath"])
         if "PowerState" in data:
             StateServer.append(data["PowerState"])
 
     # Начало извлечения
-    MeoW0extract_paths(MeoW0data)
+    FilePathsData(GetDataFromFile)
 
     # Вывод результата
-    print("redfishPath values:", MeoW0MEowNotMore, len(MeoW0MEowNotMore))
-    print("sensorName values:", OmeowDoSensor, len(OmeowDoSensor))
-    print("dbusPath values:", DBUSMEOWLINK, len(DBUSMEOWLINK))
+    print("redfishPath values:", RedFishQwery_SP, len(RedFishQwery_SP))
+    print("sensorName values:", SensorNames, len(SensorNames))
+    print("dbusPath values:", DBusQwery_SP, len(DBusQwery_SP))
     print("PowerState values:", StateServer, len(StateServer))
 
     # Если вам нужно сохранить все значения redfishPath в переменной all5
-    all5 = MeoW0MEowNotMore
+    all5 = RedFishQwery_SP
     
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
-    MeowOn()
-    ProgressMeow(1)
-    SENSOR_NAME_LIST = OmeowDoSensor
+    ProgressbarSrceenON()
+    ProgressbarState(1)
+    SENSOR_NAME_LIST = SensorNames
     end_dict = {}
     def funct0():
         os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
@@ -147,13 +148,13 @@ def CatMeow(ipAddr):
                 NewValueContinued =   aLLCatAllow[1]
                 NewValueContinued = NewValueContinued.replace("Temperatures                               property  ad        ","")
                 NewValueContinued = NewValueContinued.replace("                                            emits-change!\n","")
-                NewMeowASQ = NewValueContinued.split(" ")
+                SkipFirstElement = NewValueContinued.split(" ")
                 JNFJNF = []
-                for i in range (len(NewMeowASQ)):
+                for i in range (len(SkipFirstElement)):
                         if i == 0:
                             QWERTYUIOP = 0
                         if i >= 1:
-                            JNFJNF = JNFJNF + [NewMeowASQ[i]]
+                            JNFJNF = JNFJNF + [SkipFirstElement[i]]
                 print(JNFJNF)
                 HKLKJH = aLLCatAllow[2]
                 HKLKJH=HKLKJH.replace('Humidity',"")
@@ -187,13 +188,13 @@ def CatMeow(ipAddr):
 
                 print(JKCFHHJ)
         return end_dict
-    #ProgressMeow(0)
+    #ProgressbarState(0)
     
     os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" 'rm Extra.txt'")
     
     #ipmitool sdr
     def funct1():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> ErrorMeow.txt
+        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
         os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/Sdr.txt ./") #ipmitool power status
         
         with open("Sdr.txt", "r") as fileSDR: #чтение файла с данными на пользовательской стороне
@@ -219,81 +220,81 @@ def CatMeow(ipAddr):
 
 
     def funct2():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru | grep "+'"'+"FRU Device Description"+'"'+" > ErrorMeow.txt") #ipmitool fru | grep "FRU Device Description"> ErrorMeow.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/ErrorMeow.txt ./")
-        with open("ErrorMeow.txt", "r") as fileMeow: #чтение файла с данными на пользовательской стороне
-            contentMeow = fileMeow.read()
-            print(contentMeow)
+        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru | grep "+'"'+"FRU Device Description"+'"'+" > PlateNamesList.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
+        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/PlateNamesList.txt ./")
+        with open("PlateNamesList.txt", "r") as FilePlateNamesList: #чтение файла с данными на пользовательской стороне
+            FileDataPlateNamesList = FilePlateNamesList.read()
+            print(FileDataPlateNamesList)
                 
             
-            Meow82 = '\n'.join(line + '!' for line in contentMeow.splitlines())
-            allMeow = Meow82.split(("!"))
-        print(allMeow)
+            FileDataPlateNames_SP = '\n'.join(line + '!' for line in FileDataPlateNamesList.splitlines())
+            FileDataPlates = FileDataPlateNames_SP.split(("!"))
+        print(FileDataPlates)
         #busctl introspect xyz.openbmc_project.FruDevice /xyz/openbmc_project/FruDevice/AQC621AB
         
-        CorrectMeow = []
-        for MeowQ in allMeow:
-            Meow2 = MeowQ.replace("FRU Device Description : ","")
+        FixBoardsNames = []
+        for FileDataPlate in FileDataPlates:
+            TempDataPlate = FileDataPlate.replace("FRU Device Description : ","")
             
-            Meow3 = Meow2.split("(")
-            Meow4=Meow3[0]
-            Meow4 = Meow4.replace(" ","")
-            Meow4 = Meow4.replace("\n","")
-            if Meow4 != "":
-                Meow4=Meow4.replace("BuiltinFRUDevice","AQUARIUS_AQC621AB")
-                Meow4=Meow4.replace("AQFPB-FFC","AQFPB_FFC")#AQRZ2_U4P1_R_TMP
-                Meow4=Meow4.replace("AQRZ2-U4P1-R","AQRZ2_U4P1_R")
-                CorrectMeow = CorrectMeow + [Meow4]
-        selected_items = CorrectMeow
-        return selected_items,CorrectMeow
+            SplitFileDataPlate = TempDataPlate.split("(")
+            DataPlate=SplitFileDataPlate[0]
+            DataPlate = DataPlate.replace(" ","")
+            DataPlate = DataPlate.replace("\n","")
+            if DataPlate != "":
+                DataPlate=DataPlate.replace("BuiltinFRUDevice","AQUARIUS_AQC621AB")
+                DataPlate=DataPlate.replace("AQFPB-FFC","AQFPB_FFC")#AQRZ2_U4P1_R_TMP
+                DataPlate=DataPlate.replace("AQRZ2-U4P1-R","AQRZ2_U4P1_R")
+                FixBoardsNames = FixBoardsNames + [DataPlate]
+        selected_items = FixBoardsNames
+        return selected_items,FixBoardsNames
     
-        #CorrectMeow = CorrectMeow + ["AQUARIUS_AQC621AB"]
+        #FixBoardsNames = FixBoardsNames + ["AQUARIUS_AQC621AB"]
     def funct3():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru > MeowSENSOR.txt") #ipmitool fru | grep "FRU Device Description"> ErrorMeow.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/MeowSENSOR.txt ./")
-        #CorrectMeow = CorrectMeow +  ["Server_Chassis"]
-        with open("MeowSENSOR.txt", "r") as MeowSENSOR: #чтение файла с данными на пользовательской стороне
-            contentMeowSENSOR= MeowSENSOR.read()
-            print(contentMeowSENSOR)
-            contentMeowSENSOR=contentMeowSENSOR.replace("Product Area Checksum : OK","") 
-            contentMeowSENSOR=contentMeowSENSOR.replace("Chassis Area Checksum : OK","")      
-            contentMeowSENSOR=contentMeowSENSOR.replace("Board Area Checksum   : OK","")
-            contentMeowSENSOR=contentMeowSENSOR.replace("Product Asset Tag     : asset_tag_vv","")
-            contentMeowSENSOR=contentMeowSENSOR.replace("Device not present (Requested sensor, data, or record not found)","ERROR : NoData")
+        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru > BoardsDATA.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
+        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/BoardsDATA.txt ./")
+        #FixBoardsNames = FixBoardsNames +  ["Server_Chassis"]
+        with open("BoardsDATA.txt", "r") as BoardsDATAFileStr: #чтение файла с данными на пользовательской стороне
+            BoardsDATAFixValue= BoardsDATAFileStr.read()
+            print(BoardsDATAFixValue)
+            BoardsDATAFixValue=BoardsDATAFixValue.replace("Product Area Checksum : OK","") 
+            BoardsDATAFixValue=BoardsDATAFixValue.replace("Chassis Area Checksum : OK","")      
+            BoardsDATAFixValue=BoardsDATAFixValue.replace("Board Area Checksum   : OK","")
+            BoardsDATAFixValue=BoardsDATAFixValue.replace("Product Asset Tag     : asset_tag_vv","")
+            BoardsDATAFixValue=BoardsDATAFixValue.replace("Device not present (Requested sensor, data, or record not found)","ERROR : NoData")
             #Device not present (Requested sensor, data, or record not found)
-            MeowMeowSENSOR = '\n'.join(line + '!' for line in contentMeowSENSOR.splitlines())
+            FinalBoardsData_SP = '\n'.join(line + '!' for line in BoardsDATAFixValue.splitlines())
             
-            allMeowing = MeowMeowSENSOR.split(("FRU Device Description :"))
-        print(allMeowing)
+            FileDataWithExtra = FinalBoardsData_SP.split(("FRU Device Description :"))
+        print(FileDataWithExtra)
         
-        MeowSP = []
-        MeowExtra = ""
-        #MeowCount = 0
-        for QMEOW in allMeowing:
+        BoardsDataList = []
+        DeleteExtraBoard = ""
+        
+        for BoardNameCheck in FileDataWithExtra:
             
             
-            if "BuiltinFRUDevice" not in QMEOW:
-                while "!" in QMEOW:
-                    QMEOW = QMEOW.replace("!","")
-            if "BuiltinFRUDevice" in QMEOW:
-                while "!" in QMEOW:
-                    QMEOW = QMEOW.replace("!","")
-                MeowExtra = QMEOW
-            if "" != QMEOW:
-                MeowSP = MeowSP + [QMEOW]
+            if "BuiltinFRUDevice" not in BoardNameCheck:
+                while "!" in BoardNameCheck:
+                    BoardNameCheck = BoardNameCheck.replace("!","")
+            if "BuiltinFRUDevice" in BoardNameCheck:
+                while "!" in BoardNameCheck:
+                    BoardNameCheck = BoardNameCheck.replace("!","")
+                DeleteExtraBoard = BoardNameCheck
+            if "" != BoardNameCheck:
+                BoardsDataList = BoardsDataList + [BoardNameCheck]
                 
-        MeowSP = MeowSP + [MeowExtra]
+        BoardsDataList = BoardsDataList + [DeleteExtraBoard]
         #ipAddr = "10.12.140.137"
-        print(MeowSP)
+        print(BoardsDataList)
         
-        return allMeowing,MeowSP
+        return FileDataWithExtra,BoardsDataList
     
     #exit()
     print("0")
     def funct4():
         #os.remove("ABC.txt") #удаление файлов
         #os.remove("CBA.txt")
-        #ProgressMeow(2)
+        #ProgressbarState(2)
         
         #selected_items = ["PSU1", "/AQUARIUS_AQC621AB_Baseboard/", "PSU2", "/AQUARIUS_AQC621AB_Chassis/", "/AQFPB_FFC/"]    
         
@@ -305,11 +306,11 @@ def CatMeow(ipAddr):
         
         
         
-        DBUSMEOWLINKEND = []
-        for qwe23 in DBUSMEOWLINK:
-            DBUSMEOWLINKEND = DBUSMEOWLINKEND + [str("echo 1  && ")+qwe23+str(" &>> CBA.txt\n")]
-        #ProgressMeow(3)
-        myString = ''.join(DBUSMEOWLINKEND)
+        DBusQwery_SPEND = []
+        for qwe23 in DBusQwery_SP:
+            DBusQwery_SPEND = DBusQwery_SPEND + [str("echo 1  && ")+qwe23+str(" &>> CBA.txt\n")]
+        #ProgressbarState(3)
+        myString = ''.join(DBusQwery_SPEND)
         f = open( 'Complete.txt', 'w' )
         f.write('#!/bin/sh\n')
         f.write(myString)
@@ -346,7 +347,7 @@ def CatMeow(ipAddr):
             if "Failed to get property Value on interface xyz" in contenr59:
                 all59 = all59 + ["\nd NotInstalled"]
         print(all59)
-        #ProgressMeow(4)
+        #ProgressbarState(4)
         
         print((SENSOR_NAME_LIST))
         return all59
@@ -355,14 +356,14 @@ def CatMeow(ipAddr):
     
     
     def funct5():
-        GS = []
+        RedFishList = []
         
         DO_LIST = []
         print("2")
         link_sp = []
-        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"X-Auth-Token:"+'"'+" > MeowToken.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/MeowToken.txt ./")
-        with open("MeowToken.txt", "r") as Tokenfile79: #чтение файла с данными на серверной стороне
+        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"X-Auth-Token:"+'"'+" > token.txt")
+        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/token.txt ./")
+        with open("token.txt", "r") as Tokenfile79: #чтение файла с данными на серверной стороне
                 Tokencontent58 = Tokenfile79.read()
                 print(Tokencontent58)
                 Tokencontent89 = '\n'.join(line + '!' for line in Tokencontent58.splitlines())
@@ -370,9 +371,9 @@ def CatMeow(ipAddr):
         print(Tokenall58)
         TrueToken = Tokenall58[0]
         TrueToken = TrueToken.replace("X-Auth-Token: ","")
-        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"Id"+'"'+" > MeowID.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/MeowID.txt ./")
-        with open("MeowID.txt", "r") as IDfile79: #чтение файла с данными на серверной стороне
+        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"Id"+'"'+" > ID.txt")
+        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/ID.txt ./")
+        with open("ID.txt", "r") as IDfile79: #чтение файла с данными на серверной стороне
                 IDcontent58 = IDfile79.read()
                 print(IDcontent58)
                 IDcontent89 = '\n'.join(line + '!' for line in IDcontent58.splitlines())
@@ -398,7 +399,7 @@ def CatMeow(ipAddr):
                     #print(StrDebug)
                     os.system("curl -k 'https://"+ipAddr+""+"/redfish/v1"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep " + '"'+".Reading.:.*,\|message"+'"'+ " >> ABC.txt")
                     link_sp = link_sp + ["curl -k -u root:0penBmc -L https://"+ipAddr+""+"/redfish/v1"+i9 +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"']
-                    GS = GS + [str("curl -k -u root:0penBmc -L https://"+ipAddr+""+i9 +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"')]
+                    RedFishList = RedFishList + [str("curl -k -u root:0penBmc -L https://"+ipAddr+""+i9 +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"')]
                     d = i9.split("/")
                     d1 = d[2]
                     DO_LIST = DO_LIST + [len(d1)-2]
@@ -409,7 +410,7 @@ def CatMeow(ipAddr):
         #curl -k -X DELETE 'https://<REDFISH-HOST>/redfish/v1/SessionService/Sessions/OkFPqcVCpP' -H 'X-Auth-Token: azKvFvVfPEoHvE5a8mtv'
         print(len(all5SP))
         print("3")
-        #ProgressMeow(5)
+        #ProgressbarState(5)
         with open("ABC.txt", "r") as file72: #чтение файла с данными на пользовательской стороне
             content52 = file72.read()
             #print(content52)
@@ -432,7 +433,7 @@ def CatMeow(ipAddr):
                 all52 = all52 + [content52]
             if "message" in content52:
                 all52 = all52 + ["\n"+'"'+"Reading"+'"'+": NotInstalled_"]
-        return all52,GS
+        return all52,RedFishList
     
     def run_all_functions():
         with ThreadPoolExecutor() as executor:
@@ -454,30 +455,22 @@ def CatMeow(ipAddr):
                     print(f"{func_name} вызвала исключение: {e}")
         
         # Распаковка результатов
-        all52, GS = results['funct5']
+        all52, RedFishList = results['funct5']
         all59 = results['funct4']
-        selected_items,CorrectMeow = results['funct2']
-        allMeowing, MeowSP = results['funct3']
+        selected_items,FixBoardsNames = results['funct2']
+        FileDataWithExtra, BoardsDataList = results['funct3']
         cSDR, allSDR = results['funct1']
         end_dict = results['funct0']
 
-        return all52, GS, all59, CorrectMeow, selected_items, allMeowing, MeowSP, cSDR, allSDR, end_dict
+        return all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict
 
     # Вызов
-    all52, GS, all59, CorrectMeow, selected_items, allMeowing, MeowSP, cSDR, allSDR, end_dict = run_all_functions()
+    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict = run_all_functions()
     
     
     dub = []
-    BEST_LEN = 0
-    for o in SENSOR_NAME_LIST:
-        if BEST_LEN < len(o):
-            BEST_LEN = len(o)
-    MEOWWW_LEN = 0
-    for q in all52:
-        if MEOWWW_LEN < len(q):
-            MEOWWW_LEN = len(q)
-    nnn = GS
-    MeowForJson = []
+    
+    
     DebugList = []
     
     for i in range(len(all52)-1): #сравнение данных и вывод на экран
@@ -488,152 +481,126 @@ def CatMeow(ipAddr):
         SerVer2 = SerVer1[1]
         ert = 0
         #AQRZ2_U4P1_R_TMP
-        GSS = GS[i]
-        MQ = GS[i]
+        Redfish_Link = RedFishList[i]
+        MQ = RedFishList[i]
         
         
-        if "ACC100" in GSS or "SIL_STS4" in GSS:
-            GSS = GSS + "https://10.12.140.137/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors"
+        if "ACC100" in Redfish_Link or "SIL_STS4" in Redfish_Link:
+            Redfish_Link = Redfish_Link + "https://10.12.140.137/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors"
         DebugList = DebugList + [SENSOR_NAME_LIST[i]]
         
             
             
 
-        for gt in selected_items:
+        for item in selected_items:
             if ert == 0:
-                for nn in GS:
+                if ert == 0:
                     if ert == 0:
-                        if (gt in nn):
+                        if ert == 0:
                             if ert == 0:
-                                if gt in GSS:
-                                    for NM in GS:
-                                        for meoow in cSDR:
-                                            if OmeowDoSensor[i] in NM and "/chassis" not in NM and "/inventory" not in NM and OmeowDoSensor[i] in meoow: # and "/chassis" not in NM and "/inventory" not in NM and "/sensors" not in NM and "/powering" not in NM and "/contained_by" not in NM
+                                if item in Redfish_Link:
+                                    for RedFishQwery in RedFishList:
+                                        for SDRvalue in cSDR:
+                                            if SensorNames[i] in RedFishQwery and "/chassis" not in RedFishQwery and "/inventory" not in RedFishQwery and SensorNames[i] in SDRvalue: # and "/chassis" not in RedFishQwery and "/inventory" not in RedFishQwery and "/sensors" not in RedFishQwery and "/powering" not in RedFishQwery and "/contained_by" not in RedFishQwery
                                                 print(i)
                                                 #print(len(all52))
                                                 #print(len(all59))
                                                 
-                                                print("gt: ",gt)
-                                                NM = NM.replace("\n","")
-                                                while "|" in NM:
-                                                    NM = NM.replace("|","")
-                                                NM = NM.replace("-","")
-                                                NM = NM.replace("`","")
-                                                while " " in NM:
-                                                    NM = NM.replace(" ","")
-                                                #print("nn: ",nn)
-                                                #print("SPLIST[i]: ",SPLIST[i])#cSDR
                                                 
                                                 
-                                                SerVer2 = SerVer2.replace("null,.","null")
-                                                ClienT = ClienT.replace("nan.00","nan")
-                                                
-                                                #print(SENSOR_NAME_LIST[i] + ": "+ "Client:"+ClienT  + "|" + "Server:"+ SerVer2 + "======" + NM)
-                                                SDF = len(SENSOR_NAME_LIST[i])
-                                                Meow = BEST_LEN - SDF
-                                                tmp_str = ""
-                                                tmp_str1 = ""
-                                                for ex in range(Meow):
-                                                    tmp_str = tmp_str + " "
-                                                SDF1 = len(ClienT)
-                                                Meow1 = MEOWWW_LEN - SDF1
-                                                #tmp_str = ""
-                                                az = len(str("\n   Reading : "))
-                                                for eu in range(Meow1-az):
-                                                    tmp_str1 = tmp_str1 + " "
 
-                                                meoow=meoow.replace("\n","")
-                                                meoow=meoow.replace(str(OmeowDoSensor[i]+"|"),"")
-                                                meoow=meoow.replace(str("degreesC"),"°C")
-                                                meoow=meoow.replace(str("Volts"),"V")#percent
-                                                meoow=meoow.replace(str("percent"),"%")
-                                                meoow=meoow.replace(str("Watts"),"W")
-                                                meoow=meoow.replace(str("Amps"),"A")
-                                                meoow=meoow.replace(str("RPM")," RPM")
-                                                MeowReplace = GSS
-                                                MeowReplace=MeowReplace.replace("AQUARIUS_AQC621AB_Chassis","")
-                                                MeowReplace=MeowReplace.replace("AQUARIUS_AQC621AB_Baseboard","")#SIL_STS4
-                                                #MeowReplace=MeowReplace.replace("AQFPB_FFC"," AQFPB-FFC ")
-                                                #MeowReplace=MeowReplace.replace("AQRZ2_U4P1_R_TMP","AQRZ2_U4P1_R")
-                                                MeowReplace=MeowReplace.replace("SIL_STS4","Server_Chassis")#SIL_STS4_TMP
-                                                MeowReplace=MeowReplace.replace("SYS_FAN1_RPM","Server_Chassis")#AQRZ2_U4P1_R_TMP
-                                                MeowReplace=MeowReplace.replace("SYS_FAN2_PWM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN1_PWM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN6_PWM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN5_RPM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN6_RPM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN5_PWM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("SYS_FAN2_RPM","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("ACC100_A_TMP","1Server_Chassis1")
-                                                MeowReplace=MeowReplace.replace("ACC100_E_TMP","2Server_Chassis2")
-                                                MeowReplace=MeowReplace.replace("ACC100_W_TMP","3Server_Chassis3")
-                                                MeowReplace=MeowReplace.replace("PSU_TTL_OUT_PWR","Server_Chassis")
-                                                MeowReplace=MeowReplace.replace("PVPP_ABCD_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVNN_PCH_AX_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVDDQ_ABCD_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_A_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_B_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_F_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_C_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_H_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVDDQ_EFGH_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCIO_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("P1V8_PCH_AX_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("3V_BAT_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("P12V_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCANA_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("TEMP1_OUT_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCIN_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCIO_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVDDQ_EFGH_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_P1V8_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVDDQ_ABCD_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_G_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("P1V05_PCH_AX_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PVPP_EFGH_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCIN_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_D_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_DTS_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("DDR4_E_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_PVCCSA_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("P3V3_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("CPU1_P1V8_VLT"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("TEMP2_IN_TMP"," Server_Board ")
-                                                MeowReplace=MeowReplace.replace("PSU1_IN_VLT","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_OUT_PWR","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_OUT_VLT","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_IN_PWR","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_IN_AMP","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_FAN_RPM","PSU1")
-                                                MeowReplace=MeowReplace.replace("fanpwm_PSU1_FAN_PWM","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_OUT_AMP","PSU1")
-                                                MeowReplace=MeowReplace.replace("PSU1_IN_TMP","PSU1")
-                                                MeowReplace=MeowReplace.replace("fanpwm_PSU2_FAN_PWM","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_IN_VLT","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_OUT_AMP","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_FAN_RPM","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_IN_PWR","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_OUT_VLT","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_OUT_PWR","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_IN_TMP","PSU2")
-                                                MeowReplace=MeowReplace.replace("PSU2_IN_AMP","PSU2")
+                                                SDRvalue=SDRvalue.replace("\n","")
+                                                SDRvalue=SDRvalue.replace(str(SensorNames[i]+"|"),"")
+                                                SDRvalue=SDRvalue.replace(str("degreesC"),"°C")
+                                                SDRvalue=SDRvalue.replace(str("Volts"),"V")#percent
+                                                SDRvalue=SDRvalue.replace(str("percent"),"%")
+                                                SDRvalue=SDRvalue.replace(str("Watts"),"W")
+                                                SDRvalue=SDRvalue.replace(str("Amps"),"A")
+                                                SDRvalue=SDRvalue.replace(str("RPM")," RPM")
+                                                BoardValue = Redfish_Link
+                                                BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Chassis","")
+                                                BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Baseboard","")#SIL_STS4
+                                                #BoardValue=BoardValue.replace("AQFPB_FFC"," AQFPB-FFC ")
+                                                #BoardValue=BoardValue.replace("AQRZ2_U4P1_R_TMP","AQRZ2_U4P1_R")
+                                                BoardValue=BoardValue.replace("SIL_STS4","Server_Chassis")#SIL_STS4_TMP
+                                                BoardValue=BoardValue.replace("SYS_FAN1_RPM","Server_Chassis")#AQRZ2_U4P1_R_TMP
+                                                BoardValue=BoardValue.replace("SYS_FAN2_PWM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN1_PWM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN6_PWM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN5_RPM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN6_RPM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN5_PWM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("SYS_FAN2_RPM","Server_Chassis")
+                                                BoardValue=BoardValue.replace("ACC100_A_TMP","1Server_Chassis1")
+                                                BoardValue=BoardValue.replace("ACC100_E_TMP","2Server_Chassis2")
+                                                BoardValue=BoardValue.replace("ACC100_W_TMP","3Server_Chassis3")
+                                                BoardValue=BoardValue.replace("PSU_TTL_OUT_PWR","Server_Chassis")
+                                                BoardValue=BoardValue.replace("PVPP_ABCD_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVNN_PCH_AX_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVDDQ_ABCD_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_A_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_B_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_F_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_C_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_H_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVDDQ_EFGH_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCIO_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("P1V8_PCH_AX_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("3V_BAT_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("P12V_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCANA_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("TEMP1_OUT_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCIN_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCIO_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVDDQ_EFGH_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_P1V8_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVDDQ_ABCD_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_G_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("P1V05_PCH_AX_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PVPP_EFGH_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCIN_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_D_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_DTS_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("DDR4_E_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_PVCCSA_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("P3V3_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("CPU1_P1V8_VLT"," Server_Board ")
+                                                BoardValue=BoardValue.replace("TEMP2_IN_TMP"," Server_Board ")
+                                                BoardValue=BoardValue.replace("PSU1_IN_VLT","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_OUT_PWR","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_OUT_VLT","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_IN_PWR","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_IN_AMP","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_FAN_RPM","PSU1")
+                                                BoardValue=BoardValue.replace("fanpwm_PSU1_FAN_PWM","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_OUT_AMP","PSU1")
+                                                BoardValue=BoardValue.replace("PSU1_IN_TMP","PSU1")
+                                                BoardValue=BoardValue.replace("fanpwm_PSU2_FAN_PWM","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_IN_VLT","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_OUT_AMP","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_FAN_RPM","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_IN_PWR","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_OUT_VLT","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_OUT_PWR","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_IN_TMP","PSU2")
+                                                BoardValue=BoardValue.replace("PSU2_IN_AMP","PSU2")
                                                 
                                                 xmSensor = str(SENSOR_NAME_LIST[i] + "!"+ClienT  +  "!"+ SerVer2 +"!")
                                                 while " " in xmSensor:
                                                     xmSensor=xmSensor.replace(" ","")
-                                                end_dict[xmSensor+str(meoow)] = MeowReplace#+ "!!!!!!"+GS[i]
+                                                end_dict[xmSensor+str(SDRvalue)] = BoardValue#+ "!!!!!!"+RedFishList[i]
                                                 
-                                                dub = dub + [xmSensor+str(meoow)]
+                                                dub = dub + [xmSensor+str(SDRvalue)]
                                                 
-                                                #MeowForJson = MeowForJson + [str(SENSOR_NAME_LIST[i]+ "&" + LIST_FOR_DICT_QUERY_TO_SERVER[i]+"&"+str(allRedFISh[i]))]
+                                                
                                                 ert = 1
     os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" rm CBA.txt")
     
     print(len(SENSOR_NAME_LIST))
-    print(len(GS))
-    print(GS)
+    print(len(RedFishList))
+    print(RedFishList)
     print(all59)
-    #ProgressMeow(6)
+    #ProgressbarState(6)
         
     #print(DO_LIST)
     #print("Отмеченные предметы:", items)
@@ -655,36 +622,36 @@ def CatMeow(ipAddr):
     #{"iphone": "AQUARIUS_AQC621AB_Chassis/", "ipad": "AQUARIUS_AQC621AB_Chassis/", "iead": "AQUARIUS_AQC621AB_Baseboard/"}
     print(all52)
     print(all59)
-    print(CorrectMeow)
-    MeowOff()
+    print(FixBoardsNames)
+    ProgressbarSrceenOFF()
     
     
     
     ExtraGAV = []
     
-    ProgressMeow(2)
-    ProgressMeow(3)
-    ProgressMeow(4)
-    ProgressMeow(5)
-    ProgressMeow(6)
-    ProgressMeow(7)
+    ProgressbarState(2)
+    ProgressbarState(3)
+    ProgressbarState(4)
+    ProgressbarState(5)
+    ProgressbarState(6)
+    ProgressbarState(7)
    
 
-    DefMeow = 0
-    for w in CorrectMeow:
-        z["NoData!NoData!NoData"+str(DefMeow)] = w
-        DefMeow = DefMeow + 1
+    ForErrorBoardData = 0
+    for w in FixBoardsNames:
+        z["NoData!NoData!NoData"+str(ForErrorBoardData)] = w
+        ForErrorBoardData = ForErrorBoardData + 1
     x = x + ["Server_Chassis"]
-    FinalMeow = []
-    MeowCount = 0
+    FinalBoardsList = []
+    TempCount = 0
     for cat in x:
         print(cat)
-        if MeowCount == 0:
-            FinalMeow = FinalMeow + ["Server_Board"]
-        if MeowCount >= 1:
-            FinalMeow = FinalMeow + [cat]
-        MeowCount = MeowCount + 1
-    x = FinalMeow
+        if TempCount == 0:
+            FinalBoardsList = FinalBoardsList + ["Server_Board"]
+        if TempCount >= 1:
+            FinalBoardsList = FinalBoardsList + [cat]
+        TempCount = TempCount + 1
+    x = FinalBoardsList
     print(x)
     print(z)
     print(all5)
@@ -707,9 +674,9 @@ def CatMeow(ipAddr):
     #print(sur)
     #print(end_dict)
     print(SENSOR_NAME_LIST)
-    #print(GS)
+    #print(RedFishList)
     # Преобразуем строки в список словарей
-    data = MeowForJson
+    
     result = []
     '''for item in data:
         parts = item.split("&")
@@ -746,8 +713,8 @@ def CatMeow(ipAddr):
     #print(allPowerServer[0])
     #print(z)
     os.system("rm *.txt")
-    MeowSP = MeowSP +["SERVER is "+str(serverstate)+" "+ipAddr]
-    updateWINTo2(x, z, MeowSP)
+    BoardsDataList = BoardsDataList +["SERVER is "+str(serverstate)+" "+ipAddr]
+    updateWINTo2(x, z, BoardsDataList)
     
 
 ipAddr = ""
@@ -755,28 +722,28 @@ main_window = None
 
 
 class ItemSelector(QWidget):
-    def __init__(self, items, options_dict, meow_list=None):
+    def __init__(self, items, options_dict, DataBoardsFinalData=None):
         super().__init__()
         self.items = items
         self.options_dict = options_dict
         self.dialogs = {}
-        self.meow_list = meow_list or []
+        self.DataBoardsFinalData = DataBoardsFinalData or []
         self.setDisabled(False)
 
         self.layout = QVBoxLayout(self)  # Главный вертикальный layout
 
-        # === Убираем отображение meow_list ===
-        self.meow_label = QTextEdit(self)
-        self.meow_label.setReadOnly(True)
-        self.meow_label.setFixedHeight(100)
-        self.meow_label.setStyleSheet("background-color: #f0f0f0; font-family: Consolas;")
-        if self.meow_list:
-            self.meow_label.setText("\n".join(self.meow_list))
+        # === Убираем отображение DataBoardsFinalData ===
+        self.DataBoardsFinalData_label = QTextEdit(self)
+        self.DataBoardsFinalData_label.setReadOnly(True)
+        self.DataBoardsFinalData_label.setFixedHeight(100)
+        self.DataBoardsFinalData_label.setStyleSheet("background-color: #f0f0f0; font-family: Consolas;")
+        if self.DataBoardsFinalData:
+            self.DataBoardsFinalData_label.setText("\n".join(self.DataBoardsFinalData))
         else:
-            self.meow_label.setText("Список пуст или не передан.")
+            self.DataBoardsFinalData_label.setText("Список пуст или не передан.")
         
-        # Убираем meow_label с главного окна
-        self.meow_label.setVisible(False)  # Скрыть виджет
+        # Убираем DataBoardsFinalData_label с главного окна
+        self.DataBoardsFinalData_label.setVisible(False)  # Скрыть виджет
 
         # Остальная часть конструктора
         # === Горизонтальный layout: левая панель + правая таблица ===
@@ -805,18 +772,18 @@ class ItemSelector(QWidget):
             # 🆗 Создаём заменённое имя для анализа, не меняя оригинал
             lookup_item = item_replacements.get(item, item)
 
-            # 🔍 Найдём связанный текст из meow_list, где содержится заменённое имя
-            related_meow_lines = [
-                line for line in self.meow_list
+            # 🔍 Найдём связанный текст из DataBoardsFinalData, где содержится заменённое имя
+            related_lines = [
+                line for line in self.DataBoardsFinalData
                 if lookup_item in line
             ]
 
             # Проверим наличие строки "ERROR : NoData" в найденных строках (без учёта регистра)
-            is_meow_error = any("ERROR : NoData" in line for line in related_meow_lines)
+            is_error_InData = any("ERROR : NoData" in line for line in related_lines)
 
             # Печатаем строки, которые анализируем
             print("🔍 Проверяем строки:")
-            for line in related_meow_lines:
+            for line in related_lines:
                 print(f" → {line}")
 
             # Проверка наличия данных по заменённому имени
@@ -828,13 +795,13 @@ class ItemSelector(QWidget):
 
 
             # Печатаем результат промежуточных проверок
-            print(f"⚠️ Найдена ошибка (ERROR : NoData): {is_meow_error}")
+            print(f"⚠️ Найдена ошибка (ERROR : NoData): {is_error_InData}")
             print(f"📊 Есть данные (has_data): {has_data}")
 
             # Устанавливаем флаги и внешний вид
             list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
 
-            if is_meow_error:
+            if is_error_InData:
                 print("🚫 Элемент отключён из-за ошибки")
                 list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)  
                 list_item.setForeground(QColor("red"))
@@ -853,7 +820,8 @@ class ItemSelector(QWidget):
 
 
         left_split.addWidget(self.list_widget)
-        print(meow_list[len(meow_list)-1])
+        print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
+        print(DataBoardsFinalData)
 
         # IP секция
         ip_section = QWidget()
@@ -878,8 +846,7 @@ class ItemSelector(QWidget):
 
         # Кнопки ВКЛ и ВЫКЛ
         self.buttons_layout = QHBoxLayout()  # Горизонтальный layout для кнопок
-        self.green_button = QPushButton("ВКЛ")
-        self.red_button = QPushButton("ВЫКЛ")
+        
         # Обработка статуса и IP
         def turn_on(self):
             global ipAddr
@@ -893,7 +860,7 @@ class ItemSelector(QWidget):
             # Замените на вашу команду для выключения
             os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
         # Предположим, это у тебя внутри класса (например, в `__init__` или методе)
-        last_status_full = meow_list[-1]
+        last_status_full = DataBoardsFinalData[-1]
         parts = last_status_full.strip().split()
         ip = parts[-1]
         status = ' '.join(parts[:-1])
@@ -938,21 +905,7 @@ class ItemSelector(QWidget):
 
 
         
-        self.green_button.setStyleSheet("background-color: green; color: white;")
-        self.red_button.setStyleSheet("background-color: red; color: white;")
-
         
-
-        # Добавляем обработчики нажатий
-        self.green_button.clicked.connect(self.turn_on)
-        self.red_button.clicked.connect(self.turn_off)
-
-        # Добавляем кнопки в layout
-        self.buttons_layout.addWidget(self.green_button)
-        self.buttons_layout.addWidget(self.red_button)
-        # Добавляем кнопки в layout
-        self.buttons_layout.addWidget(self.green_button)
-        self.buttons_layout.addWidget(self.red_button)
 
         
 
@@ -1026,7 +979,7 @@ class ItemSelector(QWidget):
         
         
         # Дополнительная логика, например, вызов функции с IP-адресом
-        CatMeow(ipAddr)  # Передача IP в функцию CatMeow
+        StartProgramm(ipAddr)  # Передача IP в функцию StartProgramm
 
     
     def turn_on(self):
@@ -1121,7 +1074,7 @@ class ItemSelector(QWidget):
         if dialog_text and item_text not in self.dialogs:
             try:
                 idx = self.items.index(item_text)
-                header_text = self.meow_list[idx] if idx < len(self.meow_list) else ""
+                header_text = self.DataBoardsFinalData[idx] if idx < len(self.DataBoardsFinalData) else ""
             except ValueError:
                 header_text = ""
             self.create_dialog(item_text, dialog_text, item_text, header_text)
@@ -1268,24 +1221,24 @@ class ItemSelector(QWidget):
         elements = text.split('\n')
 
         valid_elements = []
-        meow_line_detected = False
-        meow_candidate = None
+        line_detected = False
+        candidate = None
 
         for element in elements:
             parts = element.strip().split("!")
             if len(parts) == 3 and parts[0] == "NoData" and parts[1] == "NoData" and parts[2].startswith("NoData") and parts[2][6:].isdigit():
-                meow_line_detected = True
-                meow_candidate = element.strip()
+                line_detected = True
+                candidate = element.strip()
                 continue
             if element.strip():
                 valid_elements.append(element.strip())
 
-        if meow_line_detected and len(valid_elements) == 0:
-            valid_elements.append("__MEOW__")
+        if line_detected and len(valid_elements) == 0:
+            valid_elements.append("__NO_SENSOR_ERROR__")
 
         row_index = 0
         for element in valid_elements:
-            if element == "__MEOW__":
+            if element == "__NO_SENSOR_ERROR__":
                 sensor_table.insertRow(row_index)
                 item = QTableWidgetItem("Отсутствует информация по сенсорам")
                 item.setForeground(QColor("red"))
@@ -1413,89 +1366,86 @@ class App(QWidget):
     def get_ip_address(self):
         global ipAddr
 
-        # Загружаем IP-адреса из файла ipadr.json
         with open('ipadr.json', 'r') as file:
             ip_data = json.load(file)
 
-        # Создаем кастомный диалог
         dialog = QDialog(self)
         dialog.setWindowTitle("Введите IP-адрес")
-        dialog.setMinimumSize(500, 250)  # Устанавливаем размер диалога
+        dialog.setMinimumSize(500, 250)
 
-        # Основной layout для диалога
         layout = QVBoxLayout(dialog)
 
-        # Создаем поле ввода для IP-адреса
         ip_input = QLineEdit(dialog)
         layout.addWidget(ip_input)
 
-        # Создаем выпадающий список для IP-адресов и добавляем текст для выбора
         ip_combo = QComboBox(dialog)
-        ip_combo.addItem("Выбрать IP")  # Добавляем текст "Выбрать IP" как первый элемент
+        ip_combo.addItem("Выбрать IP")
         for entry in ip_data:
             ip_combo.addItem(entry["IP"])
         layout.addWidget(ip_combo)
 
-        # Обработчик изменения выбранного IP
-        ip_combo.currentIndexChanged.connect(lambda: ip_input.setText(ip_combo.currentText() if ip_combo.currentIndex() > 0 else ""))
-
-        # Создаем кнопки ВКЛ/ВЫКЛ
-        buttons_layout = QHBoxLayout()  # Горизонтальный layout для кнопок
-        self.green_button = QPushButton("ВКЛ")
-        self.red_button = QPushButton("ВЫКЛ")
-        self.green_button.setStyleSheet("background-color: green; color: white;")
-        self.red_button.setStyleSheet("background-color: red; color: white;")
-        
-        # Изначально кнопки выключены
-        self.green_button.setEnabled(False)
-        self.red_button.setEnabled(False)
-
-        # Добавляем обработчики нажатий
-        self.green_button.clicked.connect(lambda: self.turn_on(ip_input.text()))
-        self.red_button.clicked.connect(lambda: self.turn_off(ip_input.text()))
-
-        # Добавляем кнопки в layout
-        buttons_layout.addWidget(self.green_button)
-        buttons_layout.addWidget(self.red_button)
-
-        # Добавляем кнопки в основной layout диалога
-        layout.addLayout(buttons_layout)
-
-        # Создаем кнопку OK
         ok_button = QPushButton("OK", dialog)
+        ok_button.setEnabled(False)
         layout.addWidget(ok_button)
 
-        # Обработчик нажатия на кнопку OK
+        def on_ip_changed():
+            ip = ip_input.text().strip()
+            ok_button.setEnabled(False)
+            if self.is_valid_ip_format(ip):
+                self.ping_ip(ip, lambda success: ok_button.setEnabled(success))
+
+        # При выборе IP из выпадающего списка — подставить в поле ввода
+        ip_combo.currentIndexChanged.connect(
+            lambda: ip_input.setText(ip_combo.currentText() if ip_combo.currentIndex() > 0 else "")
+        )
+
+        # Обработка ввода вручную
+        ip_input.textChanged.connect(on_ip_changed)
+
         ok_button.clicked.connect(lambda: self.on_ok_pressed(ip_input.text(), ip_combo.currentText(), dialog))
 
-        # Обработчик на изменение текста в поле ввода IP
-        ip_input.textChanged.connect(lambda: self.update_buttons(ip_input.text()))
+        dialog.exec_()
 
-        dialog.exec_()  # Показываем диалог
+    def is_valid_ip_format(self, ip):
+        parts = ip.split('.')
+        if len(parts) != 4:
+            return False
+        for part in parts:
+            if not part.isdigit():
+                return False
+            n = int(part)
+            if n < 0 or n > 255:
+                return False
+        return True
+
+    def ping_ip(self, ip, callback):
+        def run_ping():
+            try:
+                # Windows: -n, Unix-like: -c
+                cmd = ["ping", "-n" if sys.platform == "win32" else "-c", "1", ip]
+                result = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                success = result.returncode == 0
+            except Exception:
+                success = False
+            QTimer.singleShot(0, lambda: callback(success))
+
+        QTimer.singleShot(100, run_ping)
 
     def on_ok_pressed(self, ip_input_value, ip_combo_value, dialog):
         global ipAddr
-        dialog.accept()  # Закрываем диалог
+        dialog.accept()
 
-        # Проверяем, что пользователь ввел IP в текстовое поле или выбрал из выпадающего списка
-        if ip_input_value.strip():  # Если IP введен в текстовое поле
+        if ip_input_value.strip():
             ipAddr = ip_input_value
-        elif ip_combo_value.strip() and ip_combo_value != "Выбрать IP":  # Если IP выбран из выпадающего списка, игнорируя "Выбрать IP"
+        elif ip_combo_value.strip() and ip_combo_value != "Выбрать IP":
             ipAddr = ip_combo_value
         else:
-            ipAddr = "172.26.24.14"  # IP по умолчанию, если ничего не введено
+            ipAddr = "172.26.24.14"
 
-        self.label.setText(f"Используется IP: {ipAddr}")  # Обновляем метку с выбранным IP
-        CatMeow(ipAddr)  # Вызываем функцию с выбранным IP
+        self.label.setText(f"Используется IP: {ipAddr}")
+        StartProgramm(ipAddr)
 
-    def update_buttons(self, ip_input_value):
-        # Если поле ввода IP не пустое, активируем кнопки
-        if ip_input_value.strip():
-            self.green_button.setEnabled(True)
-            self.red_button.setEnabled(True)
-        else:
-            self.green_button.setEnabled(False)
-            self.red_button.setEnabled(False)
+    
 
     def turn_on(self, ip_input_value):
         global ipAddr
@@ -1509,12 +1459,12 @@ class App(QWidget):
         print("Выключение устройства")
         os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
 
-    def updateWINTo2(self, x, y, meow_list=None):
+    def updateWINTo2(self, x, y, DataBoardsFinalData=None):
         if self.page2:
             self.stack.removeWidget(self.page2)
             self.page2.deleteLater()
 
-        self.page2 = ItemSelector(x, y, meow_list)
+        self.page2 = ItemSelector(x, y, DataBoardsFinalData)
         self.stack.addWidget(self.page2)
         self.stack.setCurrentWidget(self.page2)
 
@@ -1524,9 +1474,9 @@ class App(QWidget):
 
 
 
-def updateWINTo2(x, z, meow_list=None):
+def updateWINTo2(x, z, DataBoardsFinalData=None):
     if main_window:
-        main_window.updateWINTo2(x, z, meow_list)
+        main_window.updateWINTo2(x, z, DataBoardsFinalData)
 # === Глобальные переменные ===
 overlay_widget = None
 progress_overlay = None
@@ -1536,7 +1486,7 @@ progress_bar = None
 main_window = None  # <- должен быть определён в __main__
 
 
-def MeowOn():
+def ProgressbarSrceenON():
     """
     Показывает затемнение с 7 точками, подписями и прогресс-баром.
     Подписи берутся из массива внутри этой функции.
@@ -1548,7 +1498,7 @@ def MeowOn():
         return
 
     # Сбросим всё, если уже было
-    MeowOff()
+    ProgressbarSrceenOFF()
 
     # === Встроенный массив подписей ===
     progress_texts = ["Очистка Системы", "Получение названий плат", "Получиние деревьев BUCSTL", "Получение информации по BUCSTL", "Получение информации по RedFish", "Создание общего списка", "Передача данных в интерфейс"]
@@ -1626,7 +1576,7 @@ def MeowOn():
 
 
 
-def ProgressMeow(j):
+def ProgressbarState(j):
     """
     Обновляет точки и прогресс-бар в зависимости от переданного j
     """
@@ -1652,7 +1602,7 @@ def ProgressMeow(j):
         animation.start(QPropertyAnimation.DeleteWhenStopped)
 
 
-def MeowOff():
+def ProgressbarSrceenOFF():
     """
     Закрывает затемнение и очищает прогресс-интерфейс
     """
