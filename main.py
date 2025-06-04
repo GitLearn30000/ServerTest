@@ -678,40 +678,7 @@ def StartProgramm(ipAddr):
     # Преобразуем строки в список словарей
     
     result = []
-    '''for item in data:
-        parts = item.split("&")
-        result.append({
-            "sensorName": parts[0],
-            "dbusPath": parts[1],
-            "redfishPath": parts[2]
-        })
 
-    # Сохраняем в файл paths.json
-    with open("paths.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=4)
-
-    print("Данные успешно сохранены в paths.json")'''
-    #print(all5SP)
-    #print(end_dict)
-    #print(SENSOR_NAME_LIST)
-    #print(DebugList)
-    
-    #print(allSDR)
-    #print("Extra: ",ExtraGAV)#HEATER_TEMP
-    #print("HEATER_TEMP FISH: ",ExtraGAV[0])
-    #print("HEATER_TEMP BUS: ",ExtraGAV[1])
-    #print("HEATER_HUMID FISH: ",ExtraGAV[2])
-    #print("HEATER_HUMID BUS: ",ExtraGAV[3])
-    #if len(ExtraGAV) >= 4:
-        #z["HEATER_TEMP "+str(ExtraGAV[0])+" "+ str(ExtraGAV[1])+" -"] = "IR-AX-HU1"
-        #z["HEATER_HUMID "+str(ExtraGAV[2])+" "+ str(ExtraGAV[3])+" -"] = "IR-AX-HU2"
-    #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 | grep [0-9] >> Extra.txt")
-    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
-    #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
-    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
-    #print(all52)
-    #print(allPowerServer[0])
-    #print(z)
     os.system("rm *.txt")
     BoardsDataList = BoardsDataList +["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
