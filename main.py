@@ -7,6 +7,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from sdr import funct1
+from busctl import funct4
+from redfish import funct5
 #10.12.140.137
 def StartProgramm(ipAddr):
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
@@ -131,15 +134,20 @@ def StartProgramm(ipAddr):
                             tmpYTT = tmpYTT.replace(",!","")
                             while "!" in tmpYTT:
                                 tmpYTT = tmpYTT.replace("!","")
+                            tmpYTT=tmpYTT.replace(".propertyd","")
+                            tmpYTT=tmpYTT.replace("emits-change","")
                             #нужно перевести tmpYTT в число ,обрезать до двух знаков после запятой и  перевести снова в строку, и нужно пропускать строки "null"
                             if tmpYTT.lower() != "null" and tmpYTT != "" and tmpYTT != '':
                             # Attempt to convert the cleaned string to a float
-                    
-                                number = float(tmpYTT)
-                                # Format the number to two decimal places and convert it back to a string
-                                formatted_number = f"{number:.2f}"
-                                # Append to the SOAQWER list
-                                SOAQWER = SOAQWER + [str(formatted_number)]
+                                if "" != tmpYTT:
+                                    tmpYTT=tmpYTT.replace(".propertyd","")
+                                    tmpYTT=tmpYTT.replace("emits-change","")
+                                    if "" != tmpYTT:
+                                        number = float(tmpYTT)
+                                        # Format the number to two decimal places and convert it back to a string
+                                        formatted_number = f"{number:.2f}"
+                                        # Append to the SOAQWER list
+                                        SOAQWER = SOAQWER + [str(formatted_number)]
                             if tmpYTT.lower() == "null":
                                 SOAQWER = SOAQWER + [str("null")]
                                 
@@ -148,6 +156,12 @@ def StartProgramm(ipAddr):
                 NewValueContinued =   aLLCatAllow[1]
                 NewValueContinued = NewValueContinued.replace("Temperatures                               property  ad        ","")
                 NewValueContinued = NewValueContinued.replace("                                            emits-change!\n","")
+                while "emits-change" in NewValueContinued:
+                    NewValueContinued=NewValueContinued.replace("emits-change","")
+                while "property" in NewValueContinued:
+                    NewValueContinued=NewValueContinued.replace("property","")
+                while "d" in NewValueContinued:
+                    NewValueContinued=NewValueContinued.replace("d","")
                 SkipFirstElement = NewValueContinued.split(" ")
                 JNFJNF = []
                 for i in range (len(SkipFirstElement)):
@@ -166,56 +180,36 @@ def StartProgramm(ipAddr):
                 while " " in HKLKJH:
                     HKLKJH=HKLKJH.replace(" ","")
                 HKLKJH=HKLKJH.replace("\n","")
-                number = float(HKLKJH)
-                                
-                HKLKJH = f"{number:.2f}"
-                print(HKLKJH)
-                GNXDTV = aLLCatAllow[3]
-                GNXDTV=GNXDTV.replace("property  d","")
-                GNXDTV=GNXDTV.replace("emits-change","")
-                GNXDTV=GNXDTV.replace(".Humidity","")
-                while "!" in GNXDTV:
-                    GNXDTV=GNXDTV.replace("!","")
-                while " " in GNXDTV:
-                    GNXDTV=GNXDTV.replace(" ","")
-                GNXDTV=GNXDTV.replace("\n","")
-                print(GNXDTV)
-                end_dict[str("HEATER_HUMID")+"!"+str(HKLKJH)+"!"+str(GNXDTV)+ "!-"] = "IR-AX-HU"
-                JKCFHHJ = []
-                for i in range(len(SOAQWER)):
-                    JKCFHHJ = JKCFHHJ + [str(SOAQWER[i])+" "+str(JNFJNF[i])+ " -"]
-                    end_dict[str("HEATER_TEMP-"+str(i))+"!"+str(JNFJNF[i])+"!"+str(SOAQWER[i])+ "!-"] = "IR-AX-HU"+str(i)
+                print("error")
+                if "" != HKLKJH:
+                    number = float(HKLKJH)
+                                    
+                    HKLKJH = f"{number:.2f}"
+                    print(HKLKJH)
+                    GNXDTV = aLLCatAllow[3]
+                    GNXDTV=GNXDTV.replace("property  d","")
+                    GNXDTV=GNXDTV.replace("emits-change","")
+                    GNXDTV=GNXDTV.replace(".Humidity","")
+                    while "!" in GNXDTV:
+                        GNXDTV=GNXDTV.replace("!","")
+                    while " " in GNXDTV:
+                        GNXDTV=GNXDTV.replace(" ","")
+                    GNXDTV=GNXDTV.replace("\n","")
+                    print(GNXDTV)
+                    end_dict[str("HEATER_HUMID")+"!"+str(HKLKJH)+"!"+str(GNXDTV)+ "!-"] = "IR-AX-HU"
+                    JKCFHHJ = []
+                    for i in range(len(SOAQWER)):
+                        JKCFHHJ = JKCFHHJ + [str(SOAQWER[i])+" "+str(JNFJNF[i])+ " -"]
+                        end_dict[str("HEATER_TEMP-"+str(i))+"!"+str(JNFJNF[i])+"!"+str(SOAQWER[i])+ "!-"] = "IR-AX-HU"+str(i)
 
-                print(JKCFHHJ)
+                    print(JKCFHHJ)
         return end_dict
     #ProgressbarState(0)
     
     os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" 'rm Extra.txt'")
     
     #ipmitool sdr
-    def funct1():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/Sdr.txt ./") #ipmitool power status
-        
-        with open("Sdr.txt", "r") as fileSDR: #чтение файла с данными на пользовательской стороне
-            contentSDR = fileSDR.read()
-            print(contentSDR)
-                
-            
-            SDR82 = '\n'.join(line + '!' for line in contentSDR.splitlines())
-            allSDR = SDR82.split(("!"))
-        print(allSDR)
-        cSDR = []
-        for i in allSDR:
-            i = i.replace("| ns","")
-            i = i.replace("| ok","")
-            i = i.replace("| nr","")
-            while " " in i:
-                i = i.replace(" ","")
-                
-            cSDR =cSDR+[i]
-        print(cSDR)
-        return cSDR,allSDR
+    
     
 
 
@@ -291,158 +285,21 @@ def StartProgramm(ipAddr):
     
     #exit()
     print("0")
-    def funct4():
-        #os.remove("ABC.txt") #удаление файлов
-        #os.remove("CBA.txt")
-        #ProgressbarState(2)
-        
-        #selected_items = ["PSU1", "/AQUARIUS_AQC621AB_Baseboard/", "PSU2", "/AQUARIUS_AQC621AB_Chassis/", "/AQFPB_FFC/"]    
-        
-        
-        
-        NUMBER_OF_COUNT_SENSORS = 0
-        
-        
-        
-        
-        
-        DBusQwery_SPEND = []
-        for qwe23 in DBusQwery_SP:
-            DBusQwery_SPEND = DBusQwery_SPEND + [str("echo 1  && ")+qwe23+str(" &>> CBA.txt\n")]
-        #ProgressbarState(3)
-        myString = ''.join(DBusQwery_SPEND)
-        f = open( 'Complete.txt', 'w' )
-        f.write('#!/bin/sh\n')
-        f.write(myString)
-        f.close()
-        print(NUMBER_OF_COUNT_SENSORS)
-        os.system("chmod +x Complete.txt")
-        os.system("sshpass -p 0penBmc scp ./Complete.txt root@"+ipAddr+":/home/root/Complete.txt")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" './Complete.txt'")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/CBA.txt ./")
     
-        with open("CBA.txt", "r") as file79: #чтение файла с данными на серверной стороне
-                content58 = file79.read()
-                #print(content58)
-                content89 = '\n'.join(line + '!' for line in content58.splitlines())
-                all58 = content89.split(("!"))
-        print(all58)
-        all59 = []
-        for contenr59 in all58:
-            if "." not in contenr59:
-                contenr59=contenr59+".00"
-            parts = contenr59.split('.')
-            avb = parts[0]
-            parts7 = parts[len(parts)-1]
-            parts7 = parts7[:2]
-            if parts7 != "":
-                contenr59 = avb +'.'+ parts7
-            if parts7 == "":
-                contenr59 = avb +'.'+ "00"
-            contenr59 = contenr59.replace(" nan.00"," nan")
-            #while "\nd " in contenr59:
-                #contenr59 = contenr59.replace("\nd ","")
-            if "Failed to get property Value on interface xyz" not in contenr59:
-                all59 = all59 + [contenr59]
-            if "Failed to get property Value on interface xyz" in contenr59:
-                all59 = all59 + ["\nd NotInstalled"]
-        print(all59)
-        #ProgressbarState(4)
-        
-        print((SENSOR_NAME_LIST))
-        return all59
     #all5 = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
     # Загрузка данных из файла paths.json
     
     
-    def funct5():
-        RedFishList = []
-        
-        DO_LIST = []
-        print("2")
-        link_sp = []
-        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"X-Auth-Token:"+'"'+" > token.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/token.txt ./")
-        with open("token.txt", "r") as Tokenfile79: #чтение файла с данными на серверной стороне
-                Tokencontent58 = Tokenfile79.read()
-                print(Tokencontent58)
-                Tokencontent89 = '\n'.join(line + '!' for line in Tokencontent58.splitlines())
-                Tokenall58 = Tokencontent89.split(("!"))
-        print(Tokenall58)
-        TrueToken = Tokenall58[0]
-        TrueToken = TrueToken.replace("X-Auth-Token: ","")
-        os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"Id"+'"'+" > ID.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/ID.txt ./")
-        with open("ID.txt", "r") as IDfile79: #чтение файла с данными на серверной стороне
-                IDcontent58 = IDfile79.read()
-                print(IDcontent58)
-                IDcontent89 = '\n'.join(line + '!' for line in IDcontent58.splitlines())
-                IDall58 = IDcontent89.split(("!"))
-        print(IDall58)
-        TrueID = IDall58[0]
-        while " " in TrueID:
-            TrueID = TrueID.replace(" ","")
-        while '"' in TrueID:
-            TrueID = TrueID.replace('"',"")
-        TrueID = TrueID.replace(":","")
-        TrueID = TrueID.replace(",","")
-        TrueID = TrueID.replace("Id","")
-        allRedFISh = []
-        all5SP = []
-        for ier in SENSOR_NAME_LIST:
-            for i in all5:
-                if (ier in i) and (not ".json" in i) :
-                    i9 = i
-                    
-                    all5SP = all5SP + ["curl -k 'https://"+ipAddr+""+"/redfish/v1"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt"]
-                    #StrDebug = str("curl -k 'https://"+ipAddr+"/"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt")
-                    #print(StrDebug)
-                    os.system("curl -k 'https://"+ipAddr+""+"/redfish/v1"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep " + '"'+".Reading.:.*,\|message"+'"'+ " >> ABC.txt")
-                    link_sp = link_sp + ["curl -k -u root:0penBmc -L https://"+ipAddr+""+"/redfish/v1"+i9 +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"']
-                    RedFishList = RedFishList + [str("curl -k -u root:0penBmc -L https://"+ipAddr+""+i9 +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"')]
-                    d = i9.split("/")
-                    d1 = d[2]
-                    DO_LIST = DO_LIST + [len(d1)-2]
-                    allRedFISh = allRedFISh + [i]
-        print(all5SP)
-        sur = "кол курлов"+str(len(all5SP))+"кол сенсоров redfish"+str(len(all5))+"кол сенсоров busctl"+str(len(SENSOR_NAME_LIST))
-        os.system("curl -k -X DELETE 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions/"+TrueID+"' -H 'X-Auth-Token: "+TrueToken+"'")
-        #curl -k -X DELETE 'https://<REDFISH-HOST>/redfish/v1/SessionService/Sessions/OkFPqcVCpP' -H 'X-Auth-Token: azKvFvVfPEoHvE5a8mtv'
-        print(len(all5SP))
-        print("3")
-        #ProgressbarState(5)
-        with open("ABC.txt", "r") as file72: #чтение файла с данными на пользовательской стороне
-            content52 = file72.read()
-            #print(content52)
-            
-            
-            content82 = '\n'.join(line + '!' for line in content52.splitlines())
-            all51 = content82.split(("!"))
-        print(all51)
-        all52 = []
-        for content52 in all51:
-            if "message" not in content52:
-                parts = content52.split('.')
-                avb = parts[0]
-                parts7 = parts[len(parts)-1]
-                parts7 = parts7[:3]
-                content52 = avb +'.'+ parts7
-                
-                content52.replace(",","")
-                content52 = content52.replace(": null,.\n  ",": nulll")
-                all52 = all52 + [content52]
-            if "message" in content52:
-                all52 = all52 + ["\n"+'"'+"Reading"+'"'+": NotInstalled_"]
-        return all52,RedFishList
     
-    def run_all_functions():
+    
+    def run_all_functions(ipAddr):
         with ThreadPoolExecutor() as executor:
             futures = {
-                executor.submit(funct5): 'funct5',
-                executor.submit(funct4): 'funct4',
+                executor.submit(funct5,ipAddr,SENSOR_NAME_LIST,all5): 'funct5',
+                executor.submit(funct4,DBusQwery_SP,ipAddr): 'funct4',
                 executor.submit(funct2): 'funct2',
                 executor.submit(funct3): 'funct3',
-                executor.submit(funct1): 'funct1',
+                executor.submit(funct1, ipAddr): 'funct1',
                 executor.submit(funct0): 'funct0'
             }
 
@@ -465,7 +322,7 @@ def StartProgramm(ipAddr):
         return all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict
 
     # Вызов
-    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict = run_all_functions()
+    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict = run_all_functions(ipAddr)
     
     
     dub = []
@@ -678,8 +535,41 @@ def StartProgramm(ipAddr):
     # Преобразуем строки в список словарей
     
     result = []
+    '''for item in data:
+        parts = item.split("&")
+        result.append({
+            "sensorName": parts[0],
+            "dbusPath": parts[1],
+            "redfishPath": parts[2]
+        })
 
-    os.system("rm *.txt")
+    # Сохраняем в файл paths.json
+    with open("paths.json", "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=4)
+
+    print("Данные успешно сохранены в paths.json")'''
+    #print(all5SP)
+    #print(end_dict)
+    #print(SENSOR_NAME_LIST)
+    #print(DebugList)
+    
+    #print(allSDR)
+    #print("Extra: ",ExtraGAV)#HEATER_TEMP
+    #print("HEATER_TEMP FISH: ",ExtraGAV[0])
+    #print("HEATER_TEMP BUS: ",ExtraGAV[1])
+    #print("HEATER_HUMID FISH: ",ExtraGAV[2])
+    #print("HEATER_HUMID BUS: ",ExtraGAV[3])
+    #if len(ExtraGAV) >= 4:
+        #z["HEATER_TEMP "+str(ExtraGAV[0])+" "+ str(ExtraGAV[1])+" -"] = "IR-AX-HU1"
+        #z["HEATER_HUMID "+str(ExtraGAV[2])+" "+ str(ExtraGAV[3])+" -"] = "IR-AX-HU2"
+    #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 | grep [0-9] >> Extra.txt")
+    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
+    #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
+    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
+    #print(all52)
+    #print(allPowerServer[0])
+    #print(z)
+    #os.system("rm *.txt")
     BoardsDataList = BoardsDataList +["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
     
