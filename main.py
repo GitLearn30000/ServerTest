@@ -10,6 +10,7 @@ from PyQt5.QtGui import *
 from sdr import funct1
 from busctl import funct4
 from redfish import funct5
+import re
 #10.12.140.137
 def StartProgramm(ipAddr):
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
@@ -99,6 +100,16 @@ def StartProgramm(ipAddr):
     ProgressbarState(1)
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
+    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion > informationversion.txt")
+    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
+    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion >> informationversion.txt")
+    os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/informationversion.txt ./")
+    with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
+        informationType = informationfile.read()
+        print(informationType)
+        informationSTR = '\n'.join(line + '!' for line in informationType.splitlines())
+        information_SP = informationSTR.split(("!"))
+    print(information_SP)
     def funct0():
         os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
         os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
@@ -570,7 +581,7 @@ def StartProgramm(ipAddr):
     #print(allPowerServer[0])
     #print(z)
     #os.system("rm *.txt")
-    BoardsDataList = BoardsDataList +["SERVER is "+str(serverstate)+" "+ipAddr]
+    BoardsDataList = BoardsDataList +[information_SP[0]]+[information_SP[1]]+[information_SP[2]]+["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
     
 
@@ -679,13 +690,69 @@ class ItemSelector(QWidget):
         left_split.addWidget(self.list_widget)
         print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
         print(DataBoardsFinalData)
+                # Таблица с версиями
+        
 
         # IP секция
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
+        font_scale = 0.75
+
+        # Обработка строк
+        inf0 = str(DataBoardsFinalData[-4]).replace('",', "")
+        inf0 = inf0.replace("FirmwareVersion", "BMC Version")
+
+        inf0sp=inf0.split("dev-")
+        ainf0 = inf0sp[1]
+        binf0=ainf0.split("-")
+        cinf0 = binf0[0]
+        inf0 = str('"BMC Version": ')+str('"'+cinf0+'"')
+        inf1 = str(DataBoardsFinalData[-3]).replace('",', "")
+        inf1=inf1.replace("BiosVersion","Bios Version")
+        inf2 = str(DataBoardsFinalData[-2]).replace('",', "")
+        inf2=inf2.replace("FirmwareVersion","IR-AX-HU Firmware Version")
+        VERsionSP = [inf0, inf1, inf2]
+
+        # Таблица
+        self.version_table = QTableWidget()
+        self.version_table.setRowCount(len(VERsionSP))
+        self.version_table.setColumnCount(2)
+        self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
+
+        # Применение масштабированного шрифта
+        base_font = self.version_table.font()
+        new_font = QFont(base_font)
+        new_font.setPointSizeF(base_font.pointSizeF() * font_scale)
+        self.version_table.setFont(new_font)
+
+        # Заполнение таблицы
+        for row, item in enumerate(VERsionSP):
+            if '":' in item:
+                try:
+                    name, version = item.split('":')
+                    name = name.strip().strip('"')
+                    version = version.strip().strip('" ')
+                    self.version_table.setItem(row, 0, QTableWidgetItem(name))
+                    self.version_table.setItem(row, 1, QTableWidgetItem(version))
+                except Exception as e:
+                    print(f"Ошибка при разборе строки: {item}", e)
+
+        # Автоматическая подгонка строк и колонок
+        self.version_table.resizeRowsToContents()
+        self.version_table.resizeColumnsToContents()
+
+        # Автоматическая подгонка размера таблицы под содержимое
+        self.version_table.adjustSize()
+        for row in range(self.version_table.rowCount()):
+            self.version_table.setRowHeight(row, self.version_table.sizeHintForRow(row))
+
+
+        # Добавление в layout
+        ip_layout.addWidget(self.version_table)
         ip_layout.setContentsMargins(0, 0, 0, 0)
         
         self.ip_label = QLabel("Выберите или введите IP-адрес:")
+        self.ip_label.setFixedWidth(900)
 
         
         # Создание выпадающего списка для ввода IP-адреса
@@ -783,6 +850,12 @@ class ItemSelector(QWidget):
         # Размещение в левом разделе (если он есть)
         left_split.addWidget(ip_section)
 
+
+        print(DataBoardsFinalData[-4])
+        print(DataBoardsFinalData[-3])
+        print(DataBoardsFinalData[-2])
+
+
         # Таблица
         self.main_table = QTableWidget(self)
         self.main_table.setColumnCount(4)
@@ -790,7 +863,7 @@ class ItemSelector(QWidget):
         font = QFont("Courier New", 10)
         font.setPointSizeF(font.pointSizeF() * 0.8)
         self.main_table.setFont(font)
-
+        
         main_h_layout.addWidget(self.main_table, 4)
 
         self.list_widget.itemChanged.connect(self.on_item_changed)
@@ -1201,8 +1274,8 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Состав оборудования")
-        self.setGeometry(0, 0, 1920, 1280)
-        self.setFixedSize(1920, 1280)
+        self.setGeometry(0, 0, 2100, 1350)
+        self.setFixedSize(2100, 1350)
 
         self.layout = QVBoxLayout(self)
         self.stack = QStackedLayout()
