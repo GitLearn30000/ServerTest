@@ -1,12 +1,13 @@
 import os
 def funct5(ipAddr,SENSOR_NAME_LIST,all5):
+        sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
         RedFishList = []
         
         DO_LIST = []
         print("2")
         link_sp = []
         os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"X-Auth-Token:"+'"'+" > token.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/token.txt ./")
+        os.system(sshConnectionString+ipAddr+":/home/root/token.txt ./")
         with open("token.txt", "r") as Tokenfile79: #чтение файла с данными на серверной стороне
                 Tokencontent58 = Tokenfile79.read()
                 print(Tokencontent58)
@@ -16,7 +17,7 @@ def funct5(ipAddr,SENSOR_NAME_LIST,all5):
         TrueToken = Tokenall58[0]
         TrueToken = TrueToken.replace("X-Auth-Token: ","")
         os.system("curl -k -D - -X POST 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions"             +   "'"+" -H "+'"'+"Content-Type: application/json"+'"'+" -d '"+'{'+' "'+"UserName"+'"'+": "+'"'+"root"+'"'+", "+'"'+"Password"+'"'+": "+'"'+"0penBmc"+'"'+ '}'+"' | grep "+'"'+"Id"+'"'+" > ID.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/ID.txt ./")
+        os.system(sshConnectionString+ipAddr+":/home/root/ID.txt ./")
         with open("ID.txt", "r") as IDfile79: #чтение файла с данными на серверной стороне
                 IDcontent58 = IDfile79.read()
                 print(IDcontent58)

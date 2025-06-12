@@ -7,11 +7,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from sdr import funct1
+from ipmi import funct1
 from busctl import funct4
 from redfish import funct5
 import re
 #10.12.140.137
+
+sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
+scpConnectionString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 def StartProgramm(ipAddr):
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
         if os.path.exists(filename):
@@ -19,8 +22,8 @@ def StartProgramm(ipAddr):
             print(f"✅ Удалено: {filename}")
         else:
             print(f"❌ Не найдено: {filename}")
-    os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power status"+" > PowerServer.txt")
-    os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/PowerServer.txt ./")
+    os.system(sshConnectionString+ipAddr+" ipmitool power status"+" > PowerServer.txt")
+    os.system(scpConnectionString+ipAddr+":/home/root/PowerServer.txt ./")
     with open("PowerServer.txt", "r") as filePowerServer: #чтение файла с данными на пользовательской стороне
         contentPowerServer = filePowerServer.read()
         print(contentPowerServer)
@@ -100,38 +103,36 @@ def StartProgramm(ipAddr):
     ProgressbarState(1)
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
-    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion > informationversion.txt")
-    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
-    os.system("curl -k -u root:0penBmc -L https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion >> informationversion.txt")
-    os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/informationversion.txt ./")
-    with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
-        informationType = informationfile.read()
-        print(informationType)
-        informationSTR = '\n'.join(line + '!' for line in informationType.splitlines())
-        information_SP = informationSTR.split(("!"))
-    print(information_SP)
-    def funct0():
+    CurlRequest = "curl -k -u root:0penBmc -L https://"
+    def GetFirmwareVersions(ipAddr):
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion > informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion >> informationversion.txt")
+        with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
+            informationType = informationfile.read()
+            print(informationType)
+            #informationSTR = '\n'.join(line + '!' for line in informationType.splitlines())
+            information_SP = informationType.split(("\n"))
+        print(information_SP)
+        return information_SP
+    
+    def HU_GetInfo():
         os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
+        os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
         os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/Extra.txt ./")
-        print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
-        print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
-        print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        with open("Extra.txt", "r") as ExtraTokenfile79:
-            ExtraTokencontent58 = ExtraTokenfile79.read()
-            print(ExtraTokencontent58)
+        os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
+        os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
+        
+        with open("Extra.txt", "r") as HU_file:
+            HU_content = HU_file.read()
+            print(HU_content)
             
-            ExtraTokencontent89 = '\n'.join(line + '!' for line in ExtraTokencontent58.splitlines())
-            #ExtraTokenall58 = ExtraTokencontent89.split(("!"))
-            #ExtraGAV = []
-            print("ExtraTokencontent89: ",ExtraTokencontent89)
-            if len(ExtraTokencontent89) >=1:
-                aLLCatAllow = ExtraTokencontent89.split("-------")
-                print(aLLCatAllow)
-                allREWQ = aLLCatAllow[0]
+            HU_contentStrings = '\n'.join(line + '!' for line in HU_content.splitlines())
+            print("HU_contentStrings: ",HU_contentStrings)
+            if len(HU_contentStrings) >=1:
+                SplitHURequests = HU_contentStrings.split("-------")
+                print(SplitHURequests)
+                allREWQ = SplitHURequests[0]
                 allREWQRD = allREWQ.split("\n")
                 SOAQWER = []
                 for i in range (len(allREWQRD)-1):
@@ -164,7 +165,7 @@ def StartProgramm(ipAddr):
                                 
                             
                 print(SOAQWER)
-                NewValueContinued =   aLLCatAllow[1]
+                NewValueContinued =   SplitHURequests[1]
                 NewValueContinued = NewValueContinued.replace("Temperatures                               property  ad        ","")
                 NewValueContinued = NewValueContinued.replace("                                            emits-change!\n","")
                 while "emits-change" in NewValueContinued:
@@ -181,7 +182,7 @@ def StartProgramm(ipAddr):
                         if i >= 1:
                             JNFJNF = JNFJNF + [SkipFirstElement[i]]
                 print(JNFJNF)
-                HKLKJH = aLLCatAllow[2]
+                HKLKJH = SplitHURequests[2]
                 HKLKJH=HKLKJH.replace('Humidity',"")
                 HKLKJH=HKLKJH.replace(':',"")
                 HKLKJH=HKLKJH.replace(',',"")
@@ -197,7 +198,7 @@ def StartProgramm(ipAddr):
                                     
                     HKLKJH = f"{number:.2f}"
                     print(HKLKJH)
-                    GNXDTV = aLLCatAllow[3]
+                    GNXDTV = SplitHURequests[3]
                     GNXDTV=GNXDTV.replace("property  d","")
                     GNXDTV=GNXDTV.replace("emits-change","")
                     GNXDTV=GNXDTV.replace(".Humidity","")
@@ -217,23 +218,23 @@ def StartProgramm(ipAddr):
         return end_dict
     #ProgressbarState(0)
     
-    os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" 'rm Extra.txt'")
+    os.system(sshConnectionString+ipAddr+" 'rm Extra.txt'")
     
     #ipmitool sdr
     
     
 
 
-    def funct2():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru | grep "+'"'+"FRU Device Description"+'"'+" > PlateNamesList.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/PlateNamesList.txt ./")
-        with open("PlateNamesList.txt", "r") as FilePlateNamesList: #чтение файла с данными на пользовательской стороне
-            FileDataPlateNamesList = FilePlateNamesList.read()
-            print(FileDataPlateNamesList)
+    def BoardNames():
+        os.system(sshConnectionString+ipAddr+" ipmitool fru | grep "+'"'+"FRU Device Description"+'"'+" > BoardNamesList.txt") #ipmitool fru | grep "FRU Device Description"> BoardNamesList.txt
+        os.system(scpConnectionString+ipAddr+":/home/root/BoardNamesList.txt ./")
+        with open("BoardNamesList.txt", "r") as FileBoardNamesList: #чтение файла с данными на пользовательской стороне
+            FileDataBoardNamesList = FileBoardNamesList.read()
+            print(FileDataBoardNamesList)
                 
             
-            FileDataPlateNames_SP = '\n'.join(line + '!' for line in FileDataPlateNamesList.splitlines())
-            FileDataPlates = FileDataPlateNames_SP.split(("!"))
+            FileDataBoardNames_SP = '\n'.join(line + '!' for line in FileDataBoardNamesList.splitlines())
+            FileDataPlates = FileDataBoardNames_SP.split(("!"))
         print(FileDataPlates)
         #busctl introspect xyz.openbmc_project.FruDevice /xyz/openbmc_project/FruDevice/AQC621AB
         
@@ -254,9 +255,9 @@ def StartProgramm(ipAddr):
         return selected_items,FixBoardsNames
     
         #FixBoardsNames = FixBoardsNames + ["AQUARIUS_AQC621AB"]
-    def funct3():
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool fru > BoardsDATA.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/BoardsDATA.txt ./")
+    def GetBoardsDATA():
+        os.system(sshConnectionString+ipAddr+" ipmitool fru > BoardsDATA.txt") #ipmitool fru | grep "FRU Device Description"> BoardNamesList.txt
+        os.system(scpConnectionString+ipAddr+":/home/root/BoardsDATA.txt ./")
         #FixBoardsNames = FixBoardsNames +  ["Server_Chassis"]
         with open("BoardsDATA.txt", "r") as BoardsDATAFileStr: #чтение файла с данными на пользовательской стороне
             BoardsDATAFixValue= BoardsDATAFileStr.read()
@@ -306,12 +307,14 @@ def StartProgramm(ipAddr):
     def run_all_functions(ipAddr):
         with ThreadPoolExecutor() as executor:
             futures = {
+                executor.submit(GetFirmwareVersions,ipAddr): 'GetFirmwareVersions',
                 executor.submit(funct5,ipAddr,SENSOR_NAME_LIST,all5): 'funct5',
                 executor.submit(funct4,DBusQwery_SP,ipAddr): 'funct4',
-                executor.submit(funct2): 'funct2',
-                executor.submit(funct3): 'funct3',
+                executor.submit(BoardNames): 'BoardNames',
+                executor.submit(GetBoardsDATA): 'GetBoardsDATA',
                 executor.submit(funct1, ipAddr): 'funct1',
-                executor.submit(funct0): 'funct0'
+                executor.submit(HU_GetInfo): 'HU_GetInfo',
+                
             }
 
             results = {}
@@ -325,15 +328,16 @@ def StartProgramm(ipAddr):
         # Распаковка результатов
         all52, RedFishList = results['funct5']
         all59 = results['funct4']
-        selected_items,FixBoardsNames = results['funct2']
-        FileDataWithExtra, BoardsDataList = results['funct3']
+        selected_items,FixBoardsNames = results['BoardNames']
+        FileDataWithExtra, BoardsDataList = results['GetBoardsDATA']
         cSDR, allSDR = results['funct1']
-        end_dict = results['funct0']
+        end_dict = results['HU_GetInfo']
+        information_SP = results['GetFirmwareVersions']
 
-        return all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict
+        return all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP
 
     # Вызов
-    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict = run_all_functions(ipAddr)
+    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP = run_all_functions(ipAddr)
     
     
     dub = []
@@ -354,7 +358,7 @@ def StartProgramm(ipAddr):
         
         
         if "ACC100" in Redfish_Link or "SIL_STS4" in Redfish_Link:
-            Redfish_Link = Redfish_Link + "https://10.12.140.137/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors"
+            Redfish_Link = Redfish_Link + "https:///redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors"
         DebugList = DebugList + [SENSOR_NAME_LIST[i]]
         
             
@@ -462,7 +466,7 @@ def StartProgramm(ipAddr):
                                                 
                                                 
                                                 ert = 1
-    os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" rm CBA.txt")
+    os.system(sshConnectionString+ipAddr+" rm CBA.txt")
     
     print(len(SENSOR_NAME_LIST))
     print(len(RedFishList))
@@ -476,7 +480,7 @@ def StartProgramm(ipAddr):
     #exit()
     os.remove("ABC.txt") #удаление файлов
     os.remove("CBA.txt") #удаление файлов
-    os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" touch CBA.txt") #создание пустого файла
+    os.system(sshConnectionString+ipAddr+" touch CBA.txt") #создание пустого файла
     
     x = selected_items
 
@@ -574,14 +578,17 @@ def StartProgramm(ipAddr):
         #z["HEATER_TEMP "+str(ExtraGAV[0])+" "+ str(ExtraGAV[1])+" -"] = "IR-AX-HU1"
         #z["HEATER_HUMID "+str(ExtraGAV[2])+" "+ str(ExtraGAV[3])+" -"] = "IR-AX-HU2"
     #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 | grep [0-9] >> Extra.txt")
-    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
+    #print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
     #print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
-    #print("sshpass -p 0penBmc ssh root@"+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
+    #print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
     #print(all52)
     #print(allPowerServer[0])
     #print(z)
-    #os.system("rm *.txt")
-    BoardsDataList = BoardsDataList +[information_SP[0]]+[information_SP[1]]+[information_SP[2]]+["SERVER is "+str(serverstate)+" "+ipAddr]
+    os.system("rm *.txt")
+    #BoardsDataList = []
+    if len(information_SP) >= 3:
+        BoardsDataList = BoardsDataList +[information_SP[0]]+[information_SP[1]]+[information_SP[2]]
+    BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
     
 
@@ -688,7 +695,7 @@ class ItemSelector(QWidget):
 
 
         left_split.addWidget(self.list_widget)
-        print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
+        #print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
         print(DataBoardsFinalData)
                 # Таблица с версиями
         
@@ -696,59 +703,66 @@ class ItemSelector(QWidget):
         # IP секция
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
-        font_scale = 0.75
+        if len(DataBoardsFinalData)>=3:
+            font_scale = 0.75
+            print(len(DataBoardsFinalData))
+            if "FirmwareVersion" in DataBoardsFinalData[len(DataBoardsFinalData)-2]:
+            
+                # Обработка строк
+                inf0 = str(DataBoardsFinalData[len(DataBoardsFinalData)-4]).replace('",', "")
+                
+                inf0 = inf0.replace("FirmwareVersion", "BMC Version")
+                inf0sp=inf0.split("dev-")
+                ainf0 = inf0sp[1]
+                binf0=ainf0.split("-")
+                cinf0 = binf0[0]
+                inf0 = str('"BMC Version": ')+str('"'+cinf0+'"')
+                
+                
+                inf1 = str(DataBoardsFinalData[len(DataBoardsFinalData)-3]).replace('",', "")
+                inf1=inf1.replace("BiosVersion","Bios Version")
+                
+                
+                inf2 = str(DataBoardsFinalData[len(DataBoardsFinalData)-2]).replace('",', "")
+                inf2=inf2.replace("FirmwareVersion","IR-AX-HU Firmware Version")
+                VERsionSP = [inf0, inf1, inf2]
 
-        # Обработка строк
-        inf0 = str(DataBoardsFinalData[-4]).replace('",', "")
-        inf0 = inf0.replace("FirmwareVersion", "BMC Version")
+                # Таблица
+                self.version_table = QTableWidget()
+                self.version_table.setRowCount(len(VERsionSP))
+                self.version_table.setColumnCount(2)
+                self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
 
-        inf0sp=inf0.split("dev-")
-        ainf0 = inf0sp[1]
-        binf0=ainf0.split("-")
-        cinf0 = binf0[0]
-        inf0 = str('"BMC Version": ')+str('"'+cinf0+'"')
-        inf1 = str(DataBoardsFinalData[-3]).replace('",', "")
-        inf1=inf1.replace("BiosVersion","Bios Version")
-        inf2 = str(DataBoardsFinalData[-2]).replace('",', "")
-        inf2=inf2.replace("FirmwareVersion","IR-AX-HU Firmware Version")
-        VERsionSP = [inf0, inf1, inf2]
+                # Применение масштабированного шрифта
+                base_font = self.version_table.font()
+                new_font = QFont(base_font)
+                new_font.setPointSizeF(base_font.pointSizeF() * font_scale)
+                self.version_table.setFont(new_font)
 
-        # Таблица
-        self.version_table = QTableWidget()
-        self.version_table.setRowCount(len(VERsionSP))
-        self.version_table.setColumnCount(2)
-        self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
+                # Заполнение таблицы
+                for row, item in enumerate(VERsionSP):
+                    if '":' in item:
+                        try:
+                            name, version = item.split('":')
+                            name = name.strip().strip('"')
+                            version = version.strip().strip('" ')
+                            self.version_table.setItem(row, 0, QTableWidgetItem(name))
+                            self.version_table.setItem(row, 1, QTableWidgetItem(version))
+                        except Exception as e:
+                            print(f"Ошибка при разборе строки: {item}", e)
 
-        # Применение масштабированного шрифта
-        base_font = self.version_table.font()
-        new_font = QFont(base_font)
-        new_font.setPointSizeF(base_font.pointSizeF() * font_scale)
-        self.version_table.setFont(new_font)
+                # Автоматическая подгонка строк и колонок
+                self.version_table.resizeRowsToContents()
+                self.version_table.resizeColumnsToContents()
 
-        # Заполнение таблицы
-        for row, item in enumerate(VERsionSP):
-            if '":' in item:
-                try:
-                    name, version = item.split('":')
-                    name = name.strip().strip('"')
-                    version = version.strip().strip('" ')
-                    self.version_table.setItem(row, 0, QTableWidgetItem(name))
-                    self.version_table.setItem(row, 1, QTableWidgetItem(version))
-                except Exception as e:
-                    print(f"Ошибка при разборе строки: {item}", e)
-
-        # Автоматическая подгонка строк и колонок
-        self.version_table.resizeRowsToContents()
-        self.version_table.resizeColumnsToContents()
-
-        # Автоматическая подгонка размера таблицы под содержимое
-        self.version_table.adjustSize()
-        for row in range(self.version_table.rowCount()):
-            self.version_table.setRowHeight(row, self.version_table.sizeHintForRow(row))
+                # Автоматическая подгонка размера таблицы под содержимое
+                self.version_table.adjustSize()
+                for row in range(self.version_table.rowCount()):
+                    self.version_table.setRowHeight(row, self.version_table.sizeHintForRow(row))
 
 
-        # Добавление в layout
-        ip_layout.addWidget(self.version_table)
+                # Добавление в layout
+                ip_layout.addWidget(self.version_table)
         ip_layout.setContentsMargins(0, 0, 0, 0)
         
         self.ip_label = QLabel("Выберите или введите IP-адрес:")
@@ -776,15 +790,15 @@ class ItemSelector(QWidget):
             global ipAddr
             print(f"Включение устройства с IP: {ipAddr}")
             # Замените на вашу команду для включения
-            os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power on")
+            os.system(sshConnectionString+ipAddr+" ipmitool power on")
 
         def turn_off(self):
             global ipAddr
             print(f"Выключение устройства с IP: {ipAddr}")
             # Замените на вашу команду для выключения
-            os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
+            os.system(sshConnectionString+ipAddr+" ipmitool power off")
         # Предположим, это у тебя внутри класса (например, в `__init__` или методе)
-        last_status_full = DataBoardsFinalData[-1]
+        last_status_full = DataBoardsFinalData[len(DataBoardsFinalData)-1]
         parts = last_status_full.strip().split()
         ip = parts[-1]
         status = ' '.join(parts[:-1])
@@ -851,9 +865,9 @@ class ItemSelector(QWidget):
         left_split.addWidget(ip_section)
 
 
-        print(DataBoardsFinalData[-4])
-        print(DataBoardsFinalData[-3])
-        print(DataBoardsFinalData[-2])
+        #print(DataBoardsFinalData[-4])
+        #print(DataBoardsFinalData[-3])
+        #print(DataBoardsFinalData[-2])
 
 
         # Таблица
@@ -916,13 +930,13 @@ class ItemSelector(QWidget):
         global ipAddr
         print(f"Включение устройства с IP: {ipAddr}")
         # Замените на вашу команду для включения
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power on")
+        os.system(sshConnectionString+ipAddr+" ipmitool power on")
 
     def turn_off(self):
         global ipAddr
         print(f"Выключение устройства с IP: {ipAddr}")
         # Замените на вашу команду для выключения
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
+        os.system(sshConnectionString+ipAddr+" ipmitool power off")
 
 
         
@@ -940,7 +954,7 @@ class ItemSelector(QWidget):
         self.main_table.clearContents()
         self.main_table.setRowCount(0)
         elements = options_text.split('\n')
-        bad_values = {"nan", "null", "0.0", "0.00", "0V", "0W", "0A", "0°C", "0%", "0RPM", "noreading"}
+        bad_values = {"nan", "null", "0.0", "0.00", "0V", "0W", "0A", "0°C", "0%", "0RPM", "noreading", "NotInstalled", "disabled"}
         row = 0
 
         for element in elements:
@@ -1147,7 +1161,7 @@ class ItemSelector(QWidget):
         sensor_table_height = 0
         sensor_table_width = 0
 
-        bad_values = {"nan", "null", "0.0", "0.00", "0V", "0W", "0A", "0°C", "0%", "0RPM", "noreading"}
+        bad_values = {"nan", "null", "0.0", "0.00", "0V", "0W", "0A", "0°C", "0%", "0RPM", "noreading", "NotInstalled", "disabled"}
         elements = text.split('\n')
 
         valid_elements = []
@@ -1381,13 +1395,13 @@ class App(QWidget):
         global ipAddr
         ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.14"
         print("Выключение устройства")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power on")
+        os.system(sshConnectionString+ipAddr+" ipmitool power on")
 
     def turn_off(self, ip_input_value):
         global ipAddr
         ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.14"
         print("Выключение устройства")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool power off")
+        os.system(sshConnectionString+ipAddr+" ipmitool power off")
 
     def updateWINTo2(self, x, y, DataBoardsFinalData=None):
         if self.page2:
@@ -1431,7 +1445,7 @@ def ProgressbarSrceenON():
     ProgressbarSrceenOFF()
 
     # === Встроенный массив подписей ===
-    progress_texts = ["Очистка Системы", "Получение названий плат", "Получиние деревьев BUCSTL", "Получение информации по BUCSTL", "Получение информации по RedFish", "Создание общего списка", "Передача данных в интерфейс"]
+    progress_texts = ["Очистка Системы", "Получение названий плат", "Получение деревьев BUCSTL", "Получение информации по BUCSTL", "Получение информации по RedFish", "Создание общего списка", "Передача данных в интерфейс"]
 
     # Создаём затемнение
     overlay_widget = QWidget(main_window)

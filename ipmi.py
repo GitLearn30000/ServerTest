@@ -1,7 +1,7 @@
 import os
 def funct1(ipAddr):
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/Sdr.txt ./") #ipmitool power status
+        os.system("sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
+        os.system("sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"+ipAddr+":/home/root/Sdr.txt ./") #ipmitool power status
         
         with open("Sdr.txt", "r") as fileSDR: #чтение файла с данными на пользовательской стороне
             contentSDR = fileSDR.read()

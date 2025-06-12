@@ -24,10 +24,12 @@ def funct4(DBusQwery_SP,ipAddr):
         f.write(myString)
         f.close()
         print(NUMBER_OF_COUNT_SENSORS)
+        sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
+        scpConnectionShortString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         os.system("chmod +x Complete.txt")
-        os.system("sshpass -p 0penBmc scp ./Complete.txt root@"+ipAddr+":/home/root/Complete.txt")
-        os.system("sshpass -p 0penBmc ssh root@"+ipAddr+" './Complete.txt'")
-        os.system("sshpass -p 0penBmc scp root@"+ipAddr+":/home/root/CBA.txt ./")
+        os.system(scpConnectionShortString+" ./Complete.txt root@"+ipAddr+":/home/root/Complete.txt")
+        os.system(sshConnectionString+ipAddr+" './Complete.txt'")
+        os.system(scpConnectionShortString+" root@"+ipAddr+":/home/root/CBA.txt ./")
     
         with open("CBA.txt", "r") as file79: #чтение файла с данными на серверной стороне
                 content58 = file79.read()
