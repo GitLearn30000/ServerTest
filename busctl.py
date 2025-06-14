@@ -1,5 +1,5 @@
 import os
-def funct4(DBusQwery_SP,ipAddr):
+def GetBusctlData(DBusQwery_SP,ipAddr):
         #os.remove("ABC.txt") #удаление файлов
         #os.remove("CBA.txt")
         #ProgressbarState(2)

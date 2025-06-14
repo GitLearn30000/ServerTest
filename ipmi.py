@@ -1,5 +1,5 @@
 import os
-def funct1(ipAddr):
+def GetIpmiData(ipAddr):
         os.system("sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"+ipAddr+" ipmitool sdr"+" > Sdr.txt") #ipmitool fru | grep "FRU Device Description"> PlateNamesList.txt
         os.system("sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"+ipAddr+":/home/root/Sdr.txt ./") #ipmitool power status
         
