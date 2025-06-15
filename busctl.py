@@ -1,5 +1,6 @@
 import os
 def GetBusctlData(DBusQwery_SP,ipAddr):
+        
         #os.remove("ABC.txt") #удаление файлов
         #os.remove("CBA.txt")
         #ProgressbarState(2)
@@ -26,6 +27,7 @@ def GetBusctlData(DBusQwery_SP,ipAddr):
         print(NUMBER_OF_COUNT_SENSORS)
         sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
         scpConnectionShortString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        os.system(sshConnectionString+ipAddr+" rm CBA.txt")
         os.system("chmod +x Complete.txt")
         os.system(scpConnectionShortString+" ./Complete.txt root@"+ipAddr+":/home/root/Complete.txt")
         os.system(sshConnectionString+ipAddr+" './Complete.txt'")
@@ -52,11 +54,11 @@ def GetBusctlData(DBusQwery_SP,ipAddr):
             contenr59 = contenr59.replace(" nan.00"," nan")
             #while "\nd " in contenr59:
                 #contenr59 = contenr59.replace("\nd ","")
-            if "Failed to get property Value on interface xyz" not in contenr59:
+            if "Failed to get property Value on interface xyz" not in contenr59 and contenr59 != ".00":
                 all59 = all59 + [contenr59]
             if "Failed to get property Value on interface xyz" in contenr59:
                 all59 = all59 + ["\nd NotInstalled"]
-        print(all59)
+        #print(all59)
         #ProgressbarState(4)
         
         #print((SENSOR_NAME_LIST))

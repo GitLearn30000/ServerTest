@@ -5,12 +5,12 @@ def GetIpmiData(ipAddr):
         
         with open("Sdr.txt", "r") as fileSDR: #чтение файла с данными на пользовательской стороне
             contentSDR = fileSDR.read()
-            print(contentSDR)
+            #print(contentSDR)
                 
             
             SDR82 = '\n'.join(line + '!' for line in contentSDR.splitlines())
             allSDR = SDR82.split(("!"))
-        print(allSDR)
+        #print(allSDR)
         cSDR = []
         for i in allSDR:
             i = i.replace("| ns","")
@@ -20,5 +20,5 @@ def GetIpmiData(ipAddr):
                 i = i.replace(" ","")
                 
             cSDR =cSDR+[i]
-        print(cSDR)
+        #print(cSDR)
         return cSDR,allSDR

@@ -126,107 +126,96 @@ def StartProgramm(ipAddr):
     
     def HU_GetInfo():
         a = datetime.datetime.now()
-        os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
-        os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
-        os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
+        Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://172.26.24.21/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
+        Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@172.26.24.21 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
+        result2 = os.popen(Qwery1).read()
+        result3 = os.popen(Qwery2).read()
+
         
-        with open("Extra.txt", "r") as HU_file:
-            HU_content = HU_file.read()
-            print("")#print(HU_content)
+        result2_1=result2.split("]")
+        result2_1_1=result2_1[0]
+        result2_1_1=result2_1_1.replace("[\n","")
+        while " " in result2_1_1:
+            result2_1_1=result2_1_1.replace(" ","")
+        while "," in result2_1_1:
+            result2_1_1=result2_1_1.replace(",","")
+        result2_1_1=result2_1_1.split("\n")
+        result_222 = []
+        for i0 in result2_1_1:
+            if len(i0) >= 2:
+                if i0 != "null":
+                    number = float(i0)
+                    i0 = f"{number:.2f}"
+                    result_222=result_222+[i0]
+                if i0 == "null":
+                    result_222=result_222+["null"]
+
+
+        
+        
+        result2_1_2=result2_1[1]
+        result2_1_2=result2_1_2.split('"')
+        result2_1_2=result2_1_2[len(result2_1_2)-1]
+        result2_1_2=result2_1_2.replace("\n","")
+        number = float(result2_1_2)
+        result2_1_2 = f"{number:.2f}"
+
+        result3=result3.replace(".Humidity","")
+        result3=result3.replace(".Temperatures","")
+        result3=result3.replace("emits-change","",10)
+        result3=result3.replace("property  d","",10)
+        result3=result3.replace("property","",10)
+        result3=result3.replace("\n","",10)
+        result3=result3.split("ad")
+        result3_1=result3[0]
+        result3_1=result3_1.split(" ")
+        Res3_1=""
+        for i1 in result3_1:
+            if len(i1) >= 4:
+                number = float(i1)
+                i1 = f"{number:.2f}"
+                Res3_1 = i1
+        result3_2=result3[1]
+        result3_2=result3_2.split(" ")
+        print("Result3_2 ", result3_2)
+        Res3_2=[]
+        for i2 in result3_2:
             
-            HU_contentStrings = '\n'.join(line + '!' for line in HU_content.splitlines())
+            if len(i2) >= 2:
+                if i2 != "nan":
+                    number = float(i2)
+                    i2 = f"{number:.2f}"
+                    Res3_2 = Res3_2 + [i2]
+                if i2 == "nan":
+                    Res3_2 = Res3_2 + ["nan"]
 
-            print("HU_contentStrings: ",HU_contentStrings)
-            if len(HU_contentStrings) >=1:
-                SplitHURequests = HU_contentStrings.split("-------")
-                print("")#print(SplitHURequests)
-                allREWQ = SplitHURequests[0]
-                allREWQRD = allREWQ.split("\n")
-                SOAQWER = []
-                for i in range (len(allREWQRD)-1):
-                        if i == 0:
-                            QWERTYUIOP = 0
-                        if i >= 1:
-                            tmpYTT = allREWQRD[i]
-                            while " " in tmpYTT:
-                                tmpYTT = tmpYTT.replace(" ","")
-                            
-                            tmpYTT = tmpYTT.replace(",!","")
-                            while "!" in tmpYTT:
-                                tmpYTT = tmpYTT.replace("!","")
-                            tmpYTT=tmpYTT.replace(".propertyd","")
-                            tmpYTT=tmpYTT.replace("emits-change","")
-                            #нужно перевести tmpYTT в число ,обрезать до двух знаков после запятой и  перевести снова в строку, и нужно пропускать строки "null"
-                            if tmpYTT.lower() != "null" and tmpYTT != "" and tmpYTT != '':
-                            # Attempt to convert the cleaned string to a float
-                                if "" != tmpYTT:
-                                    tmpYTT=tmpYTT.replace(".propertyd","")
-                                    tmpYTT=tmpYTT.replace("emits-change","")
-                                    if "" != tmpYTT:
-                                        number = float(tmpYTT)
-                                        # Format the number to two decimal places and convert it back to a string
-                                        formatted_number = f"{number:.2f}"
-                                        # Append to the SOAQWER list
-                                        SOAQWER = SOAQWER + [str(formatted_number)]
-                            if tmpYTT.lower() == "null":
-                                SOAQWER = SOAQWER + [str("null")]
-                                
-                            
-                print("")#print(SOAQWER)
-                NewValueContinued =   SplitHURequests[1]
-                NewValueContinued = NewValueContinued.replace("Temperatures                               property  ad        ","")
-                NewValueContinued = NewValueContinued.replace("                                            emits-change!\n","")
-                while "emits-change" in NewValueContinued:
-                    NewValueContinued=NewValueContinued.replace("emits-change","")
-                while "property" in NewValueContinued:
-                    NewValueContinued=NewValueContinued.replace("property","")
-                while "d" in NewValueContinued:
-                    NewValueContinued=NewValueContinued.replace("d","")
-                SkipFirstElement = NewValueContinued.split(" ")
-                JNFJNF = []
-                for i in range (len(SkipFirstElement)):
-                        if i == 0:
-                            QWERTYUIOP = 0
-                        if i >= 1:
-                            JNFJNF = JNFJNF + [SkipFirstElement[i]]
-                print("")#print(JNFJNF)
-                HKLKJH = SplitHURequests[2]
-                HKLKJH=HKLKJH.replace('Humidity',"")
-                HKLKJH=HKLKJH.replace(':',"")
-                HKLKJH=HKLKJH.replace(',',"")
-                HKLKJH=HKLKJH.replace('!',"")
-                while '"' in HKLKJH:
-                    HKLKJH=HKLKJH.replace('"',"")
-                while " " in HKLKJH:
-                    HKLKJH=HKLKJH.replace(" ","")
-                HKLKJH=HKLKJH.replace("\n","")
-                print("")#print("error")
-                if "" != HKLKJH:
-                    number = float(HKLKJH)
-                                    
-                    HKLKJH = f"{number:.2f}"
-                    print("")#print(HKLKJH)
-                    GNXDTV = SplitHURequests[3]
-                    GNXDTV=GNXDTV.replace("property  d","")
-                    GNXDTV=GNXDTV.replace("emits-change","")
-                    GNXDTV=GNXDTV.replace(".Humidity","")
-                    while "!" in GNXDTV:
-                        GNXDTV=GNXDTV.replace("!","")
-                    while " " in GNXDTV:
-                        GNXDTV=GNXDTV.replace(" ","")
-                    GNXDTV=GNXDTV.replace("\n","")
-                    print("")#print(GNXDTV)
-                    end_dict[str("HEATER_HUMID")+"!"+str(HKLKJH)+"!"+str(GNXDTV)+ "!-"] = "IR-AX-HU"
-                    JKCFHHJ = []
-                    for i in range(len(SOAQWER)):
-                        JKCFHHJ = JKCFHHJ + [str(SOAQWER[i])+" "+str(JNFJNF[i])+ " -"]
-                        end_dict[str("HEATER_TEMP-"+str(i))+"!"+str(JNFJNF[i])+"!"+str(SOAQWER[i])+ "!-"] = "IR-AX-HU"+str(i)
+        #print("Result2 ", result2)
+        #print("Result3 ", result3)
+        print("Result2-1 ", result_222)
+        print("Result2-2 ", result2_1_2)
+        print("Result3_1 ", Res3_1)
+        print("Result3_2 ", Res3_2)
+        end_dict = {}
+        end_dict["HEATER_HUMID-0!"+result2_1_2+"!"+Res3_1+"!-"]="IR-AX-HU"
+        
+        s = [0,1,2,3,4,5,6]
+        for i in s:
+            i = int(i)
+            print(str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-")
+            end_dict[str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-"]="IR-AX-HU"+str(i)
+        
+        print("End_dict:  ",end_dict)
+        
 
-                    print("")#print(JKCFHHJ)
-        b = datetime.datetime.now()
-        print("")#print("Time difference for getting HU_GetInfo = ", b -a)
+
+
+        #os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
+        #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
+        #os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
+        #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
+        #os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
+        
+        
         return end_dict
     #ProgressbarState(0)
     
@@ -359,7 +348,17 @@ def StartProgramm(ipAddr):
     
     DebugList = []
     
-    for i in range(len(all52)-1): #сравнение данных и вывод на экран
+    print(all52,"lenAll52: " ,len(all52))
+    print(all59,"lenAll59: " ,len(all59))
+    print(cSDR)
+    print(len(cSDR))
+    for i in range(0,len(all59)): #сравнение данных и вывод на экран
+        name =SENSOR_NAME_LIST[i]
+
+        print(all52[i],all59[i])
+        print(name)
+        print(i)
+        
         ClienT = all52[i].split(":")
         ClienT = ClienT[1]
         ClienT = ClienT[:-1]
@@ -376,18 +375,18 @@ def StartProgramm(ipAddr):
         DebugList = DebugList + [SENSOR_NAME_LIST[i]]
         
             
-            
+        
 
-        for item in selected_items:
+        if ert == 0:
             if ert == 0:
                 if ert == 0:
                     if ert == 0:
                         if ert == 0:
                             if ert == 0:
-                                if item in Redfish_Link:
-                                    for RedFishQwery in RedFishList:
-                                        for SDRvalue in cSDR:
-                                            if SensorNames[i] in RedFishQwery and "/chassis" not in RedFishQwery and "/inventory" not in RedFishQwery and SensorNames[i] in SDRvalue: # and "/chassis" not in RedFishQwery and "/inventory" not in RedFishQwery and "/sensors" not in RedFishQwery and "/powering" not in RedFishQwery and "/contained_by" not in RedFishQwery
+                                if ert == 0:
+                                    for SDRvalue in cSDR:
+                                        if name in SDRvalue:
+                                            if ert == 0:
                                                 print("")#print(i)
                                                 #print("")#print(len(all52))
                                                 #print("")#print(len(all59))
@@ -478,10 +477,10 @@ def StartProgramm(ipAddr):
                                                 
                                                 dub = dub + [xmSensor+str(SDRvalue)]
                                                 
-                                                
+                                                print(name)
                                                 ert = 1
-    os.system(sshConnectionString+ipAddr+" rm CBA.txt")
     
+    #i=i+1
     print("")#print(len(SENSOR_NAME_LIST))
     print("")#print(len(RedFishList))
     print("")#print(RedFishList)
@@ -492,8 +491,8 @@ def StartProgramm(ipAddr):
     #print("")#print("Отмеченные предметы:", items)
         
     #exit()
-    os.remove("ABC.txt") #удаление файлов
-    os.remove("CBA.txt") #удаление файлов
+    #os.remove("ABC.txt") #удаление файлов
+    #os.remove("CBA.txt") #удаление файлов
     os.system(sshConnectionString+ipAddr+" touch CBA.txt") #создание пустого файла
     
     x = selected_items
