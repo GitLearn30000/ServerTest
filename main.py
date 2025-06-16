@@ -108,11 +108,17 @@ def StartProgramm(ipAddr):
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
     CurlRequest = "curl -k -u root:0penBmc -L https://"
+
     def GetFirmwareVersions(ipAddr):
         a = datetime.datetime.now()
         os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion > informationversion.txt")
         os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
         os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board | grep Revision >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQFPB_FFC | grep Revision >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_RM_Board | grep Revision >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard | grep Revision >> informationversion.txt")
+
         
         with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
             informationType = informationfile.read()
@@ -122,9 +128,23 @@ def StartProgramm(ipAddr):
         print("")#print(information_SP)
         b = datetime.datetime.now()
         print("")#print("Time difference for getting GetFirmwareVersions = ", b -a)
+        '''print("information_SP[0] ",information_SP[0])
+        print("information_SP[1] ",information_SP[1])
+        print("information_SP[2] ",information_SP[2])
+        print("information_SP[3] ",information_SP[3])
+        print("information_SP[4] ",information_SP[4])
+        print("information_SP[5] ",information_SP[5])
+        print("information_SP[6] ",information_SP[6])'''
+        print(information_SP)
+        if len(information_SP) == 0:
+            information_SP = information_SP + ['"error": "GetFirmwareVersions"']
         return information_SP
     
     def HU_GetInfo():
+        end_dict = {}
+        
+        
+        print("end_dict: ",end_dict)
         a = datetime.datetime.now()
         Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://172.26.24.21/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
         Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@172.26.24.21 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
@@ -132,79 +152,86 @@ def StartProgramm(ipAddr):
         result3 = os.popen(Qwery2).read()
 
         
-        result2_1=result2.split("]")
-        result2_1_1=result2_1[0]
-        result2_1_1=result2_1_1.replace("[\n","")
-        while " " in result2_1_1:
-            result2_1_1=result2_1_1.replace(" ","")
-        while "," in result2_1_1:
-            result2_1_1=result2_1_1.replace(",","")
-        result2_1_1=result2_1_1.split("\n")
-        result_222 = []
-        for i0 in result2_1_1:
-            if len(i0) >= 2:
-                if i0 != "null":
-                    number = float(i0)
-                    i0 = f"{number:.2f}"
-                    result_222=result_222+[i0]
-                if i0 == "null":
-                    result_222=result_222+["null"]
+        if result2 and result3:
+            if len(result2) >= 1:
+                result2_1=result2.split("]")
+                if len(result2_1) ==2:
+                    result2_1_1=result2_1[0]
+                    result2_1_1=result2_1_1.replace("[\n","")
+                    while " " in result2_1_1:
+                        result2_1_1=result2_1_1.replace(" ","")
+                    while "," in result2_1_1:
+                        result2_1_1=result2_1_1.replace(",","")
+                    result2_1_1=result2_1_1.split("\n")
+                    result_222 = []
+                    for i0 in result2_1_1:
+                        if len(i0) >= 2:
+                            if i0 != "null":
+                                number = float(i0)
+                                i0 = f"{number:.2f}"
+                                result_222=result_222+[i0]
+                            if i0 == "null":
+                                result_222=result_222+["null"]
 
 
+                
+                
+                result2_1_2=result2_1[1]
+                result2_1_2=result2_1_2.split('"')
+                result2_1_2=result2_1_2[len(result2_1_2)-1]
+                result2_1_2=result2_1_2.replace("\n","")
+                number = float(result2_1_2)
+                result2_1_2 = f"{number:.2f}"
+            if len(result3) >= 1:
+                result3=result3.replace(".Humidity","")
+                result3=result3.replace(".Temperatures","")
+                result3=result3.replace("emits-change","",10)
+                result3=result3.replace("property  d","",10)
+                result3=result3.replace("property","",10)
+                result3=result3.replace("\n","",10)
+                result3=result3.split("ad")
+                
+                if len(result3) ==2:
+                    result3_1=result3[0]
+                    result3_1=result3_1.split(" ")
+                    Res3_1=""
+                    for i1 in result3_1:
+                        if len(i1) >= 4:
+                            number = float(i1)
+                            i1 = f"{number:.2f}"
+                            Res3_1 = i1
+                    result3_2=result3[1]
+                    result3_2=result3_2.split(" ")
+                    print("Result3_2 ", result3_2)
+                    Res3_2=[]
+                    for i2 in result3_2:
+                        
+                        if len(i2) >= 2:
+                            if i2 != "nan":
+                                number = float(i2)
+                                i2 = f"{number:.2f}"
+                                Res3_2 = Res3_2 + [i2]
+                            if i2 == "nan":
+                                Res3_2 = Res3_2 + ["nan"]
+
+                    #print("Result2 ", result2)
+                    #print("Result3 ", result3)
+                    print("Result2-1 ", result_222)
+                    print("Result2-2 ", result2_1_2)
+                    print("Result3_1 ", Res3_1)
+                    print("Result3_2 ", Res3_2)
+        
+            if (len(result2_1_2) and len(Res3_1)) >= 1:
+                end_dict["HEATER_HUMID-0!"+result2_1_2+"!"+Res3_1+"!-"]="IR-AX-HU"
         
         
-        result2_1_2=result2_1[1]
-        result2_1_2=result2_1_2.split('"')
-        result2_1_2=result2_1_2[len(result2_1_2)-1]
-        result2_1_2=result2_1_2.replace("\n","")
-        number = float(result2_1_2)
-        result2_1_2 = f"{number:.2f}"
-
-        result3=result3.replace(".Humidity","")
-        result3=result3.replace(".Temperatures","")
-        result3=result3.replace("emits-change","",10)
-        result3=result3.replace("property  d","",10)
-        result3=result3.replace("property","",10)
-        result3=result3.replace("\n","",10)
-        result3=result3.split("ad")
-        result3_1=result3[0]
-        result3_1=result3_1.split(" ")
-        Res3_1=""
-        for i1 in result3_1:
-            if len(i1) >= 4:
-                number = float(i1)
-                i1 = f"{number:.2f}"
-                Res3_1 = i1
-        result3_2=result3[1]
-        result3_2=result3_2.split(" ")
-        print("Result3_2 ", result3_2)
-        Res3_2=[]
-        for i2 in result3_2:
+            if (len(result_222) and len(Res3_2)) >= 1:
+                for i in range(0,len(Res3_2)):
+                    i = int(i)
+                    print(str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-")
+                    end_dict[str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-"]="IR-AX-HU"+str(i)
             
-            if len(i2) >= 2:
-                if i2 != "nan":
-                    number = float(i2)
-                    i2 = f"{number:.2f}"
-                    Res3_2 = Res3_2 + [i2]
-                if i2 == "nan":
-                    Res3_2 = Res3_2 + ["nan"]
-
-        #print("Result2 ", result2)
-        #print("Result3 ", result3)
-        print("Result2-1 ", result_222)
-        print("Result2-2 ", result2_1_2)
-        print("Result3_1 ", Res3_1)
-        print("Result3_2 ", Res3_2)
-        end_dict = {}
-        end_dict["HEATER_HUMID-0!"+result2_1_2+"!"+Res3_1+"!-"]="IR-AX-HU"
-        
-        s = [0,1,2,3,4,5,6]
-        for i in s:
-            i = int(i)
-            print(str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-")
-            end_dict[str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-"]="IR-AX-HU"+str(i)
-        
-        print("End_dict:  ",end_dict)
+            print("End_dict:  ",end_dict)
         
 
 
@@ -213,8 +240,9 @@ def StartProgramm(ipAddr):
         #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
         #os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
         #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        #os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
         
+        else:
+            end_dict["hu_error_error"] = "hu_error"#os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
         
         return end_dict
     #ProgressbarState(0)
@@ -355,9 +383,9 @@ def StartProgramm(ipAddr):
     for i in range(0,len(all59)): #сравнение данных и вывод на экран
         name =SENSOR_NAME_LIST[i]
 
-        print(all52[i],all59[i])
-        print(name)
-        print(i)
+        #print(all52[i],all59[i])
+        #print(name)
+        #print(i)
         
         ClienT = all52[i].split(":")
         ClienT = ClienT[1]
@@ -477,14 +505,14 @@ def StartProgramm(ipAddr):
                                                 
                                                 dub = dub + [xmSensor+str(SDRvalue)]
                                                 
-                                                print(name)
+                                                #print(name)
                                                 ert = 1
     
     #i=i+1
-    print("")#print(len(SENSOR_NAME_LIST))
-    print("")#print(len(RedFishList))
-    print("")#print(RedFishList)
-    print("")#print(all59)
+    #print("")#print(len(SENSOR_NAME_LIST))
+    #print("")#print(len(RedFishList))
+    #print("")#print(RedFishList)
+    #print("")#print(all59)
     #ProgressbarState(6)
         
     #print("")#print(DO_LIST)
@@ -605,6 +633,7 @@ def StartProgramm(ipAddr):
     #BoardsDataList = []
     if len(information_SP) >= 3:
         BoardsDataList = BoardsDataList +[information_SP[0]]+[information_SP[1]]+[information_SP[2]]
+    
     BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
     
@@ -718,35 +747,47 @@ class ItemSelector(QWidget):
         
 
         # IP секция
+        print("DataBoardsFinalData: ", DataBoardsFinalData)
+        last_empty_index = len(DataBoardsFinalData) - 1 - DataBoardsFinalData[::-1].index("")
+
+        # Извлечь все элементы после него
+        ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
+
+        # Проверка результата
+        print(ResolveErrors)
+        last_empty_index = len(DataBoardsFinalData) - 1 - DataBoardsFinalData[::-1].index("")
+
+        # Извлечь элементы после него
+        ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
+
+        # Замены
+        first_firmware_found = False
+
+        for i in range(len(ResolveErrors)):
+            if "FirmwareVersion" in ResolveErrors[i]:
+                if not first_firmware_found:
+                    ResolveErrors[i] = ResolveErrors[i].replace("FirmwareVersion", "BMC Version")
+                    first_firmware_found = True
+                else:
+                    ResolveErrors[i] = ResolveErrors[i].replace("FirmwareVersion", "IR-AX-HU Firmware Version")
+            if "BiosVersion" in ResolveErrors[i]:
+                ResolveErrors[i] = ResolveErrors[i].replace("BiosVersion", "Bios Version")
+        ResolveErrors.pop()
+        # Результат
+        print(ResolveErrors)
+
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
-        if len(DataBoardsFinalData)>=3:
-            font_scale = 0.75
-            print("")#print(len(DataBoardsFinalData))
-            if "FirmwareVersion" in DataBoardsFinalData[len(DataBoardsFinalData)-2]:
+        if len(ResolveErrors)>=1:
+            if "" == "":
+                
+                font_scale = 0.75
             
-                # Обработка строк
-                inf0 = str(DataBoardsFinalData[len(DataBoardsFinalData)-4]).replace('",', "")
-                
-                inf0 = inf0.replace("FirmwareVersion", "BMC Version")
-                inf0sp=inf0.split("dev-")
-                ainf0 = inf0sp[1]
-                binf0=ainf0.split("-")
-                cinf0 = binf0[0]
-                inf0 = str('"BMC Version": ')+str('"'+cinf0+'"')
-                
-                
-                inf1 = str(DataBoardsFinalData[len(DataBoardsFinalData)-3]).replace('",', "")
-                inf1=inf1.replace("BiosVersion","Bios Version")
-                
-                
-                inf2 = str(DataBoardsFinalData[len(DataBoardsFinalData)-2]).replace('",', "")
-                inf2=inf2.replace("FirmwareVersion","IR-AX-HU Firmware Version")
-                VERsionSP = [inf0, inf1, inf2]
+                print("ResolveErrors: ",ResolveErrors)
 
                 # Таблица
                 self.version_table = QTableWidget()
-                self.version_table.setRowCount(len(VERsionSP))
+                self.version_table.setRowCount(len(ResolveErrors))
                 self.version_table.setColumnCount(2)
                 self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
 
@@ -757,7 +798,7 @@ class ItemSelector(QWidget):
                 self.version_table.setFont(new_font)
 
                 # Заполнение таблицы
-                for row, item in enumerate(VERsionSP):
+                for row, item in enumerate(ResolveErrors):
                     if '":' in item:
                         try:
                             name, version = item.split('":')

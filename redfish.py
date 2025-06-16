@@ -19,7 +19,7 @@ def GetRedfishData(TrueID, TrueToken,ipAddr,SENSOR_NAME_LIST,all5):
                 #all5SP = all5SP + ["curl -k 'https://"+ipAddr+""+"/redfish/v1"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt"]
                 #StrDebug = str("curl -k 'https://"+ipAddr+"/"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt")
                 size_before = os.path.getsize(filename) if os.path.exists(filename) else 0
-                print("size_before",size_before)
+                #print("size_before",size_before)
                 os.system("curl -k 'https://"+ipAddr+""+"/redfish/v1"+i9+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep " + '"'+".Reading.:.*,\|message"+'"'+ " >> ABC.txt")
                 size_after = os.path.getsize(filename)
                 print("size_after",size_after)
