@@ -111,13 +111,53 @@ def StartProgramm(ipAddr):
 
     def GetFirmwareVersions(ipAddr):
         a = datetime.datetime.now()
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion > informationversion.txt")
+        #curl -k -u root:0penBmc -L https://172.26.24.21/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version
+        
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion > informationversion.txt")
+        
+        os.system(CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion >> informationversion.txt")
         os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board | grep Revision >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQFPB_FFC | grep Revision >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_RM_Board | grep Revision >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard | grep Revision >> informationversion.txt")
+        os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
+        #os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion >> informationversion.txt")
+        
+        
+        def insert_before_last_line(filepath, line_to_insert):
+            with open(filepath, 'r') as f:
+                lines = f.readlines()
+
+            if len(lines) < 2:
+                lines.append(line_to_insert + '\n')
+            else:
+                lines = lines[:-1] + [line_to_insert + '\n'] + [lines[-1]]
+
+            with open(filepath, 'w') as f:
+                f.writelines(lines)
+
+        def run_and_insert(endpoint, comment):
+            url = f"{CurlRequest}{ipAddr}{endpoint}"
+            try:
+                # Выполнение curl | grep Revision
+                result = subprocess.check_output(f"{url} | grep Revision", shell=True, text=True)
+
+                # Берем только первую строку результата (если вдруг несколько — можно адаптировать)
+                first_line = result.strip().splitlines()[0]
+
+                # Добавляем комментарий к этой строке
+                combined_line = f'"{comment}_{first_line}'
+
+                # Вставляем перед последней строкой
+                insert_before_last_line("informationversion.txt", combined_line)
+            except (subprocess.CalledProcessError, IndexError):
+                # Если curl/grep неудачны или нет строки — ничего не делаем
+                pass
+
+        # Вызовы
+        run_and_insert("/redfish/v1/Chassis/IR_AX_HU_Board", "IR_AX_HU")
+        run_and_insert("/redfish/v1/Chassis/AQFPB_FFC", "AQFPB_FFC")
+        run_and_insert("/redfish/v1/Chassis/IR_AX_RM_Board", "IR_AX_RM")
+        run_and_insert("/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard", "AQC621AB")
+
 
         
         with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
@@ -138,6 +178,21 @@ def StartProgramm(ipAddr):
         print(information_SP)
         if len(information_SP) == 0:
             information_SP = information_SP + ['"error": "GetFirmwareVersions"']
+        information_SP.pop()
+        for i, item in enumerate(information_SP):
+            if "Version" in item:
+                bios_item = information_SP.pop(i)  # удалить найденный элемент
+                information_SP.insert(0, bios_item)  # вставить в начало
+
+        
+            
+                
+        
+            
+        # Результат
+        print("Обновлённый information_SP:")
+        print(information_SP)
+
         return information_SP
     
     def HU_GetInfo():
@@ -631,8 +686,8 @@ def StartProgramm(ipAddr):
     print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
     print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
     #BoardsDataList = []
-    if len(information_SP) >= 3:
-        BoardsDataList = BoardsDataList +[information_SP[0]]+[information_SP[1]]+[information_SP[2]]
+    for i in range(0,len(information_SP)):
+        BoardsDataList = BoardsDataList +[information_SP[i]]
     
     BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
     updateWINTo2(x, z, BoardsDataList)
@@ -766,18 +821,64 @@ class ItemSelector(QWidget):
         for i in range(len(ResolveErrors)):
             if "FirmwareVersion" in ResolveErrors[i]:
                 if not first_firmware_found:
+                    #ResolveErrors[i] = ResolveErrors[i].replace("FirmwareVersion", "IR-AX-HU Firmware Version")
                     ResolveErrors[i] = ResolveErrors[i].replace("FirmwareVersion", "BMC Version")
+                    ResolveErrors[i] = ResolveErrors[i].replace('",', "")
+                    TempError = ResolveErrors[i]
+                    Resolve = ResolveErrors[i]
+                    Resolve=Resolve.split('"')
+                    Resolve=Resolve[len(Resolve)-1]
+                    TempError = TempError.split("dev-")[1]
+                    TempError = TempError.split("-")[0]
+                    ResolveErrors[i] = ResolveErrors[i].replace(Resolve,TempError)
+                    
+                    #ResolveErrors[i] = ResolveErrors[i].replace("", "")
+
                     first_firmware_found = True
                 else:
                     ResolveErrors[i] = ResolveErrors[i].replace("FirmwareVersion", "IR-AX-HU Firmware Version")
             if "BiosVersion" in ResolveErrors[i]:
                 ResolveErrors[i] = ResolveErrors[i].replace("BiosVersion", "Bios Version")
+            ResolveErrors[i] = ResolveErrors[i].replace('"Version', "CPLD Version")
+            ResolveErrors[i] = ResolveErrors[i].replace('",', "")
+            ResolveErrors[i] = ResolveErrors[i].replace('"Revision', "Revision")
         ResolveErrors.pop()
         # Результат
         print(ResolveErrors)
+        ResolveErrors_1 = ResolveErrors
+        # Подстрока, по которой делим
+        split_keyword = "Revision"
+
+        # Ищем индекс первого вхождения строки, содержащей 'Revision'
+        split_index = next((i for i, line in enumerate(ResolveErrors_1) if split_keyword in line), len(ResolveErrors_1))
+
+        # Разделяем список
+        ResolveErrors = ResolveErrors_1[:split_index]
+        from_revision = ResolveErrors_1[split_index:]
+        for item in from_revision[:]:  # копия для безопасной итерации
+            if 'BiosVersion' in item:
+                from_revision.remove(item)
+                ResolveErrors.append(item)
+
+        print("До 'Revision':")
+        print(ResolveErrors)
+        required_elements = ["IR_AX_HU", "AQFPB_FFC", "IR_AX_RM", "AQC621AB"]
+        for element in required_elements:
+            if not any(element in line for line in from_revision):
+                missing_line = f'"{element}_Revision": "no"'
+                from_revision.append(missing_line)
+
+        print("\nС 'Revision' и после:")
+        
+        print(from_revision)
+
+        
 
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
+        self.firmware_label = QLabel("firmware")
+        ip_layout.addWidget(self.firmware_label)
+        
         if len(ResolveErrors)>=1:
             if "" == "":
                 
@@ -809,19 +910,98 @@ class ItemSelector(QWidget):
                         except Exception as e:
                             print("")#print(f"Ошибка при разборе строки: {item}", e)
 
-                # Автоматическая подгонка строк и колонок
-                self.version_table.resizeRowsToContents()
+                # Размер по содержимому ячеек
                 self.version_table.resizeColumnsToContents()
+                self.version_table.resizeRowsToContents()
 
-                # Автоматическая подгонка размера таблицы под содержимое
-                self.version_table.adjustSize()
-                for row in range(self.version_table.rowCount()):
-                    self.version_table.setRowHeight(row, self.version_table.sizeHintForRow(row))
+                # Суммируем ширину всех колонок
+                total_width = sum([self.version_table.columnWidth(col) for col in range(self.version_table.columnCount())])
+
+                # Добавим ширину вертикального заголовка
+                total_width += self.version_table.verticalHeader().width()
+
+                # Добавим ширину рамки (scrollbar + рамки виджета)
+                total_width += 4  # небольшой запас
+
+                # Аналогично для высоты
+                total_height = sum([self.version_table.rowHeight(row) for row in range(self.version_table.rowCount())])
+                total_height += self.version_table.horizontalHeader().height()
+                total_height += 4  # запас
+
+                # Установка финального размера
+                self.version_table.setMinimumSize(total_width, total_height)
+                self.version_table.setMaximumSize(total_width, total_height)
+
+                ip_layout.addWidget(self.version_table)
+    
+        #ip_layout.setContentsMargins(0, 0, 0, 0)
+        self.hardware_label = QLabel("hardware")
+        ip_layout.addWidget(self.hardware_label)
+        if len(from_revision)>=1:
+            if "" == "":
+                
+                font_scale = 0.75
+            
+                print("from_revision: ",from_revision)
+
+                # Таблица
+                self.version_table2 = QTableWidget()
+                self.version_table2.setRowCount(len(from_revision))
+                self.version_table2.setColumnCount(2)
+                self.version_table2.setHorizontalHeaderLabels(["Название", "Версия"])
+
+                # Применение масштабированного шрифта
+                base_font = self.version_table2.font()
+                new_font = QFont(base_font)
+                new_font.setPointSizeF(base_font.pointSizeF() * font_scale)
+                self.version_table2.setFont(new_font)
+
+                for row, item in enumerate(from_revision):
+                    if '":' in item:
+                        try:
+                            name, version = item.split('":')
+                            name = name.strip().strip('"')
+                            version = version.strip().strip('" ')
+
+                            name_item = QTableWidgetItem(name)
+                            version_item = QTableWidgetItem(version)
+
+                            # Если в версии содержится 'no'
+                            if "no" in version.lower():
+                                version_item.setForeground(QColor("red"))           # Красный текст
+                                name_item.setForeground(QColor(139, 0, 0))          # Тёмно-красный (RGB)
+
+                            self.version_table2.setItem(row, 0, name_item)
+                            self.version_table2.setItem(row, 1, version_item)
+
+                        except Exception as e:
+                            print("")  # можно логировать ошибку, если нужно
+
+                # Размер по содержимому ячеек
+                self.version_table2.resizeColumnsToContents()
+                self.version_table2.resizeRowsToContents()
+
+                # Суммируем ширину всех колонок
+                total_width = sum([self.version_table2.columnWidth(col) for col in range(self.version_table2.columnCount())])
+
+                # Добавим ширину вертикального заголовка
+                total_width += self.version_table2.verticalHeader().width()
+
+                # Добавим ширину рамки (scrollbar + рамки виджета)
+                total_width += 4  # небольшой запас
+
+                # Аналогично для высоты
+                total_height = sum([self.version_table2.rowHeight(row) for row in range(self.version_table2.rowCount())])
+                total_height += self.version_table2.horizontalHeader().height()
+                total_height += 4  # запас
+
+                # Установка финального размера
+                self.version_table2.setMinimumSize(total_width, total_height)
+                self.version_table2.setMaximumSize(total_width, total_height)
 
 
                 # Добавление в layout
-                ip_layout.addWidget(self.version_table)
-        ip_layout.setContentsMargins(0, 0, 0, 0)
+                ip_layout.addWidget(self.version_table2)
         
         #self.ip_label = QLabel(" ")
         #self.ip_label.setFixedWidth(900)
@@ -920,6 +1100,9 @@ class ItemSelector(QWidget):
         ip_layout.addLayout(self.buttons_layout)
         #ip2_label
         ip_layout.addWidget(self.ip2_label)
+        
+        
+        
 
         ip_layout.addWidget(self.i1p_label)
 
