@@ -54,7 +54,7 @@
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "P3V3_VLT",
         "dbusPath": "busctl get-property xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/P3V3_VLT xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT"
@@ -90,25 +90,25 @@
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "SYS_FAN1_RPM",
         "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN1_RPM xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "SYS_FAN2_RPM",
         "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN2_RPM xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "SYS_FAN5_RPM",
         "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN5_RPM xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "SYS_FAN6_RPM",
         "dbusPath": "busctl get-property     xyz.openbmc_project.FanSensor /xyz/openbmc_project/sensors/fan_tach/SYS_FAN6_RPM xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM"
@@ -336,7 +336,7 @@
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "PSU1_OUT_VLT",
         "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU1_OUT_VLT xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT"
@@ -348,7 +348,7 @@
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT"
     },
     {
-        "PowerState": "off",
+        "PowerState": "on",
         "sensorName": "PSU2_OUT_VLT",
         "dbusPath": "busctl get-property     xyz.openbmc_project.PSUSensor /xyz/openbmc_project/sensors/voltage/PSU2_OUT_VLT xyz.openbmc_project.Sensor.Value Value",
         "redfishPath": "/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT"
