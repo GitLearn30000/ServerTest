@@ -33,33 +33,34 @@ def GetBusctlData(DBusQwery_SP,ipAddr):
         os.system(sshConnectionString+ipAddr+" './Complete.txt'")
         os.system(scpConnectionShortString+" root@"+ipAddr+":/home/root/CBA.txt ./")
     
-        with open("CBA.txt", "r") as file79: #чтение файла с данными на серверной стороне
-                content58 = file79.read()
-                #print(content58)
-                content89 = '\n'.join(line + '!' for line in content58.splitlines())
-                all58 = content89.split(("!"))
-        print(all58)
-        all59 = []
-        for contenr59 in all58:
-            if "." not in contenr59:
-                contenr59=contenr59+".00"
-            parts = contenr59.split('.')
-            avb = parts[0]
-            parts7 = parts[len(parts)-1]
-            parts7 = parts7[:2]
-            if parts7 != "":
-                contenr59 = avb +'.'+ parts7
-            if parts7 == "":
-                contenr59 = avb +'.'+ "00"
-            contenr59 = contenr59.replace(" nan.00"," nan")
-            #while "\nd " in contenr59:
-                #contenr59 = contenr59.replace("\nd ","")
-            if "Failed to get property Value on interface xyz" not in contenr59 and contenr59 != ".00":
-                all59 = all59 + [contenr59]
-            if "Failed to get property Value on interface xyz" in contenr59:
-                all59 = all59 + ["\nd NotInstalled"]
-        #print(all59)
+        with open("CBA.txt", "r") as ServerValues: #чтение файла с данными на серверной стороне
+                ServerValuesStrings = ServerValues.read()
+                #print(ServerValuesStrings)
+                FixServerValuesStrings = '\n'.join(line + '!' for line in ServerValuesStrings.splitlines())
+                SplitServerValuesStrings = FixServerValuesStrings.split(("!"))
+        print(SplitServerValuesStrings)
+        FinalServerData = []
+        for ServerIndexValue in SplitServerValuesStrings:
+            if "." not in ServerIndexValue:
+                ServerIndexValue=ServerIndexValue+".00"
+            parts = ServerIndexValue.split('.')
+            FixServerIndexValue = parts[0]
+            ServerIndexValueAfterPoint = parts[len(parts)-1]
+            ServerIndexValueAfterPoint = ServerIndexValueAfterPoint[:2]
+            if ServerIndexValueAfterPoint != "":
+                ServerIndexValue = FixServerIndexValue +'.'+ ServerIndexValueAfterPoint
+            if ServerIndexValueAfterPoint == "":
+                ServerIndexValue = FixServerIndexValue +'.'+ "00"
+            ServerIndexValue = ServerIndexValue.replace(" nan.00"," nan")
+            #while "\nd " in ServerIndexValue:
+                #ServerIndexValue = ServerIndexValue.replace("\nd ","")
+            if "Failed to get property Value on interface xyz" not in ServerIndexValue and ServerIndexValue != ".00":
+                FinalServerData = FinalServerData + [ServerIndexValue]
+            if "Failed to get property Value on interface xyz" in ServerIndexValue:
+                FinalServerData = FinalServerData + ["\nd NotInstalled"]
+        #print(FinalServerData)
+        #ProgressbarState(4)
         #ProgressbarState(4)
         
         #print((SENSOR_NAME_LIST))
-        return all59
+        return FinalServerData

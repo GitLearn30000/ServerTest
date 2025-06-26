@@ -13,20 +13,27 @@ from busctl import GetBusctlData
 from redfish import GetRedfishData
 from IDandToken import GetIDandToken
 import re
+import time
 #10.12.140.137
 
 sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 scpConnectionString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 def StartProgramm(ipAddr):
+    #ProgressbarState(0)
+    ProgressbarSrceenON()
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
         if os.path.exists(filename):
             os.remove(filename)
             print("")#print(f"✅ Удалено: {filename}")
         else:
             print("")#print(f"❌ Не найдено: {filename}")
+    ProgressbarState(1)
+    
     os.system(sshConnectionString+ipAddr+" ipmitool power status"+" > PowerServer.txt")
     os.system(scpConnectionString+ipAddr+":/home/root/PowerServer.txt ./")
+    
     TrueID, TrueToken = GetIDandToken(ipAddr)
+    ProgressbarState(3)
     print("Получено из фунцкии: ",TrueID, TrueToken)
     with open("PowerServer.txt", "r") as filePowerServer: #чтение файла с данными на пользовательской стороне
         contentPowerServer = filePowerServer.read()
@@ -36,6 +43,8 @@ def StartProgramm(ipAddr):
         PowerServer82 = '\n'.join(line + '!' for line in contentPowerServer.splitlines())
         allPowerServer = PowerServer82.split(("!"))
     print("")#print(allPowerServer[0])
+    ProgressbarState(2)
+    
 
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
@@ -103,8 +112,9 @@ def StartProgramm(ipAddr):
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
-    ProgressbarSrceenON()
-    ProgressbarState(1)
+    
+    
+    
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
     CurlRequest = "curl -k -u root:0penBmc -L https://"
@@ -113,15 +123,22 @@ def StartProgramm(ipAddr):
         a = datetime.datetime.now()
         #curl -k -u root:0penBmc -L https://172.26.24.21/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version
         
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion > informationversion.txt")
+        DebugQuery1 = CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion"
+        DebugQuery2 = CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion"
+
+        DebugQuery4 = CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version"
+        #/redfish/v1/Chassis/AQRZ2_U4P1_R | grep Revision
+        #Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
         
-        os.system(CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
-        os.system(CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion >> informationversion.txt")
-        #os.system(CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion >> informationversion.txt")
+        resultDebug1 = os.popen(DebugQuery1).read()
+        resultDebug2 = os.popen(DebugQuery2).read()
+        resultDebug4 = os.popen(DebugQuery4).read()
+        print("resultDebug1",resultDebug1,DebugQuery1)
+        print("resultDebug2",resultDebug2,DebugQuery2)
         
-        
+        print("resultDebug4",resultDebug4,DebugQuery4)
+        os.system("echo  > informationversion.txt")
+
         def insert_before_last_line(filepath, line_to_insert):
             with open(filepath, 'r') as f:
                 lines = f.readlines()
@@ -133,31 +150,35 @@ def StartProgramm(ipAddr):
 
             with open(filepath, 'w') as f:
                 f.writelines(lines)
-
+        print("ok 1")
         def run_and_insert(endpoint, comment):
             url = f"{CurlRequest}{ipAddr}{endpoint}"
             try:
                 # Выполнение curl | grep Revision
                 result = subprocess.check_output(f"{url} | grep Revision", shell=True, text=True)
 
-                # Берем только первую строку результата (если вдруг несколько — можно адаптировать)
-                first_line = result.strip().splitlines()[0]
-
-                # Добавляем комментарий к этой строке
-                combined_line = f'"{comment}_{first_line}'
-
-                # Вставляем перед последней строкой
-                insert_before_last_line("informationversion.txt", combined_line)
+                # Берем только первую строку результата
+                lines = result.strip().splitlines()
+                if lines:
+                    first_line = lines[0]
+                    combined_line = f'"{comment} {first_line}'
+                else:
+                    combined_line = f'"Error {comment}": "no"'
             except (subprocess.CalledProcessError, IndexError):
-                # Если curl/grep неудачны или нет строки — ничего не делаем
-                pass
+                # В случае ошибки при выполнении команды
+                combined_line = f'"{comment}": "no"'
+
+            insert_before_last_line("informationversion.txt", combined_line)
 
         # Вызовы
         run_and_insert("/redfish/v1/Chassis/IR_AX_HU_Board", "IR_AX_HU")
         run_and_insert("/redfish/v1/Chassis/AQFPB_FFC", "AQFPB_FFC")
         run_and_insert("/redfish/v1/Chassis/IR_AX_RM_Board", "IR_AX_RM")
         run_and_insert("/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard", "AQC621AB")
-
+        run_and_insert("/redfish/v1/Chassis/AQRZ2_U4P1_R", "AQRZ2_U4P1_R")
+        #run_and_insert("/redfish/v1/Chassis/AQRZ2_U4P1_R", "AQRZ2_U4P1_R")
+        #os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQRZ2_U4P1_R | grep Revision >> informationversion.txt")
+        print("ok 2")
 
         
         with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
@@ -165,7 +186,25 @@ def StartProgramm(ipAddr):
             print("")#print(informationType)
             #informationSTR = '\n'.join(line + '!' for line in informationType.splitlines())
             information_SP = informationType.split(("\n"))
+        while '' in information_SP:
+            information_SP.remove('')
+        print("ok 3")
+        if len(resultDebug1) >= 5:
+            resultDebug1=resultDebug1.replace(",\n","")
+            resultDebug1=resultDebug1.replace("FirmwareVersion","IR-AX-HU Firmware Version")
+            information_SP =  [resultDebug1] + information_SP
+        if len(resultDebug2) >= 5:
+            resultDebug2=resultDebug2.replace(",\n","")#BiosVersion
+            resultDebug2=resultDebug2.replace("BiosVersion","Bios Version")
+            information_SP = [resultDebug2] + information_SP 
+        
+            
+        if len(resultDebug4) >= 5:
+            resultDebug4=resultDebug4.replace(",\n","")
+            resultDebug4=resultDebug4.replace("Version","CPLD Version")
+            information_SP = [resultDebug4] + information_SP
         print("")#print(information_SP)
+        print("ok 4")
         b = datetime.datetime.now()
         print("")#print("Time difference for getting GetFirmwareVersions = ", b -a)
         '''print("information_SP[0] ",information_SP[0])
@@ -178,11 +217,12 @@ def StartProgramm(ipAddr):
         print(information_SP)
         if len(information_SP) == 0:
             information_SP = information_SP + ['"error": "GetFirmwareVersions"']
-        information_SP.pop()
+        #information_SP.pop()
         for i, item in enumerate(information_SP):
             if "Version" in item:
                 bios_item = information_SP.pop(i)  # удалить найденный элемент
                 information_SP.insert(0, bios_item)  # вставить в начало
+        
 
         
             
@@ -192,7 +232,27 @@ def StartProgramm(ipAddr):
         # Результат
         print("Обновлённый information_SP:")
         print(information_SP)
+        for i in range(0,len(information_SP)):
+            if i <= 3:
+                
+                information_SP[i]=information_SP[i].replace("IR_AX_HU","IR_AX_HU Version")
+                information_SP[i]=information_SP[i].replace("AQFPB_FFC","AQFPB_FFC Version")
 
+            if i <= 8 and i >= 4:
+                if "Revision" not in information_SP[i]:
+                    information_SP[i]=information_SP[i].replace("IR_AX_RM","IR_AX_RM Revision")
+                    information_SP[i]=information_SP[i].replace("AQC621AB","AQC621AB Revision")#"AQFPB_FFC "Revision"
+                    information_SP[i]=information_SP[i].replace("AQRZ2_U4P1_R_","AQRZ2_U4P1_R Revision")
+                    information_SP[i]=information_SP[i].replace("AQRZ2_U4P1_R","AQRZ2_U4P1_R Revision")
+                    information_SP[i]=information_SP[i].replace("IR_AX_HU_","IR_AX_HU Revision")
+                    information_SP[i]=information_SP[i].replace("IR_AX_HU","IR_AX_HU Revision")
+                    information_SP[i]=information_SP[i].replace('AQFPB_FFC "',"AQFPB_FFC ")
+                    information_SP[i]=information_SP[i].replace("AQFPB_FFC_","AQFPB_FFC Revision")
+                    information_SP[i]=information_SP[i].replace("AQFPB_FFC","AQFPB_FFC Revision")
+                    
+                
+            
+            information_SP[i]=information_SP[i].replace("_Rev"," Rev")
         return information_SP
     
     def HU_GetInfo():
@@ -201,8 +261,8 @@ def StartProgramm(ipAddr):
         
         print("end_dict: ",end_dict)
         a = datetime.datetime.now()
-        Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://172.26.24.21/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
-        Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@172.26.24.21 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
+        Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://'''+ipAddr+'''/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
+        Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
         result2 = os.popen(Qwery1).read()
         result3 = os.popen(Qwery2).read()
 
@@ -300,7 +360,7 @@ def StartProgramm(ipAddr):
             end_dict["hu_error_error"] = "hu_error"#os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
         
         return end_dict
-    #ProgressbarState(0)
+    
     
     os.system(sshConnectionString+ipAddr+" 'rm Extra.txt'")
     
@@ -391,39 +451,61 @@ def StartProgramm(ipAddr):
     
     
     def run_all_functions(ipAddr):
+        funcs = {
+            1: (GetFirmwareVersions, (ipAddr,)),
+            2: (GetRedfishData, (TrueID, TrueToken, ipAddr, SENSOR_NAME_LIST, all5)),
+            3: (GetBusctlData, (DBusQwery_SP, ipAddr)),
+            4: (BoardNames, ()),
+            5: (GetBoardsDATA, ()),
+            6: (GetIpmiData, (ipAddr,)),
+            7: (HU_GetInfo, ()),
+        }
+
+        results = {}
         with ThreadPoolExecutor() as executor:
-            futures = {
-                executor.submit(GetFirmwareVersions,ipAddr): 'GetFirmwareVersions',
-                executor.submit(GetRedfishData,TrueID, TrueToken,ipAddr,SENSOR_NAME_LIST,all5): 'GetRedfishData',
-                executor.submit(GetBusctlData,DBusQwery_SP,ipAddr): 'GetBusctlData',
-                executor.submit(BoardNames): 'BoardNames',
-                executor.submit(GetBoardsDATA): 'GetBoardsDATA',
-                executor.submit(GetIpmiData, ipAddr): 'GetIpmiData',
-                executor.submit(HU_GetInfo): 'HU_GetInfo',
-                
-            }
+            futures = {}
+            for i, (func, args) in funcs.items():
+                futures[executor.submit(func, *args)] = i
 
-            results = {}
             for future in as_completed(futures):
-                func_name = futures[future]
+                i = futures[future]
                 try:
-                    results[func_name] = future.result()
+                    results[i] = future.result()
                 except Exception as e:
-                    print("")#print(f"{func_name} вызвала исключение: {e}")
-        
-        # Распаковка результатов
-        all52, RedFishList = results['GetRedfishData']
-        all59 = results['GetBusctlData']
-        selected_items,FixBoardsNames = results['BoardNames']
-        FileDataWithExtra, BoardsDataList = results['GetBoardsDATA']
-        cSDR, allSDR = results['GetIpmiData']
-        end_dict = results['HU_GetInfo']
-        information_SP = results['GetFirmwareVersions']
+                    results[i] = None
+                    print(f"Функция {i} вызвала исключение: {e}")
 
-        return all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP
+                # Явный вызов TestFun с каждым номером функции через if
+                #progress_texts = ["6 получение firmware и hardware", "7 Получение названий плат", "8 Получение данных по платам", 
+                # "4 Получение информации по BUCSTL", "5 Получение информации по RedFish", 
+                # "9 Получение нформации по Ipmi", "10 Получение нформации по HU"]
+                if i == 1:
+                    ProgressbarState(5)#
+                elif i == 2:
+                    ProgressbarState(10)#
+                elif i == 3:
+                    ProgressbarState(9)#
+                elif i == 4:
+                    ProgressbarState(6)#
+                elif i == 5:
+                    ProgressbarState(7)#
+                elif i == 6:
+                    ProgressbarState(8)#
+                elif i == 7:
+                    ProgressbarState(4)#
+        # Распаковка результатов
+        FinalClientData, RedFishList = results[2]
+        FinalServerData = results[3]
+        selected_items, FixBoardsNames = results[4]
+        FileDataWithExtra, BoardsDataList = results[5]
+        cSDR, allSDR = results[6]
+        end_dict = results[7]
+        information_SP = results[1]
+
+        return FinalClientData, RedFishList, FinalServerData, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP
 
     # Вызов
-    all52, RedFishList, all59, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP = run_all_functions(ipAddr)
+    FinalClientData, RedFishList, FinalServerData, FixBoardsNames, selected_items, FileDataWithExtra, BoardsDataList, cSDR, allSDR, end_dict, information_SP = run_all_functions(ipAddr)
     
     
     dub = []
@@ -431,21 +513,21 @@ def StartProgramm(ipAddr):
     
     DebugList = []
     
-    print(all52,"lenAll52: " ,len(all52))
-    print(all59,"lenAll59: " ,len(all59))
+    print(FinalClientData,"lenFinalClientData: " ,len(FinalClientData))
+    print(FinalServerData,"lenFinalServerData: " ,len(FinalServerData))
     print(cSDR)
     print(len(cSDR))
-    for i in range(0,len(all59)): #сравнение данных и вывод на экран
+    for i in range(0,len(FinalServerData)): #сравнение данных и вывод на экран
         name =SENSOR_NAME_LIST[i]
 
-        #print(all52[i],all59[i])
+        #print(FinalClientData[i],FinalServerData[i])
         #print(name)
         #print(i)
         
-        ClienT = all52[i].split(":")
+        ClienT = FinalClientData[i].split(":")
         ClienT = ClienT[1]
         ClienT = ClienT[:-1]
-        SerVer1 = all59[i].split(" ")
+        SerVer1 = FinalServerData[i].split(" ")
         SerVer2 = SerVer1[1]
         ert = 0
         #AQRZ2_U4P1_R_TMP
@@ -471,8 +553,8 @@ def StartProgramm(ipAddr):
                                         if name in SDRvalue:
                                             if ert == 0:
                                                 print("")#print(i)
-                                                #print("")#print(len(all52))
-                                                #print("")#print(len(all59))
+                                                #print("")#print(len(FinalClientData))
+                                                #print("")#print(len(FinalServerData))
                                                 
                                                 
                                                 
@@ -567,7 +649,7 @@ def StartProgramm(ipAddr):
     #print("")#print(len(SENSOR_NAME_LIST))
     #print("")#print(len(RedFishList))
     #print("")#print(RedFishList)
-    #print("")#print(all59)
+    #print("")#print(FinalServerData)
     #ProgressbarState(6)
         
     #print("")#print(DO_LIST)
@@ -588,8 +670,8 @@ def StartProgramm(ipAddr):
     z = end_dict
     
     #{"iphone": "AQUARIUS_AQC621AB_Chassis/", "ipad": "AQUARIUS_AQC621AB_Chassis/", "iead": "AQUARIUS_AQC621AB_Baseboard/"}
-    print("")#print(all52)
-    print("")#print(all59)
+    print("")#print(FinalClientData)
+    print("")#print(FinalServerData)
     print("")#print(FixBoardsNames)
     ProgressbarSrceenOFF()
     
@@ -597,12 +679,7 @@ def StartProgramm(ipAddr):
     
     ExtraGAV = []
     
-    ProgressbarState(2)
-    ProgressbarState(3)
-    ProgressbarState(4)
-    ProgressbarState(5)
-    ProgressbarState(6)
-    ProgressbarState(7)
+
    
 
     ForErrorBoardData = 0
@@ -625,17 +702,17 @@ def StartProgramm(ipAddr):
     print("")#print(all5)
     print("")#print("-------------------")
     print("")#print(cSDR)
-    print("")#print("all52",len(all52))
-    print("")#print("all59",len(all59))
+    print("")#print("FinalClientData",len(FinalClientData))
+    print("")#print("FinalServerData",len(FinalServerData))
     print("")#print("cSDR",len(cSDR))
-    print("")#print(all52)
-    print("")#print(all59)
+    print("")#print(FinalClientData)
+    print("")#print(FinalServerData)
     print("")#print("-------------------")
     print("")#print("-------------------")
     print("")#print("-------------------")
     #print("")#print(cONLY_NAME_SENSOR)
     #print("")#print(len(cONLY_NAME_SENSOR))
-    print("")#print(all59)
+    print("")#print(FinalServerData)
     print("")#print("-------------------")
     print("")#print("-------------------")
     print("")#print("-------------------")
@@ -677,7 +754,7 @@ def StartProgramm(ipAddr):
     #print("")#print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
     #print("")#print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
     #print("")#print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
-    #print("")#print(all52)
+    #print("")#print(FinalClientData)
     #print("")#print(allPowerServer[0])
     #print("")#print(z)
     os.system("rm *.txt")
@@ -686,10 +763,18 @@ def StartProgramm(ipAddr):
     print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
     print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
     #BoardsDataList = []
+    
+    DebugQuery3 = CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion"
+    resultDebug3 = os.popen(DebugQuery3).read()
+    print("resultDebug3",resultDebug3,DebugQuery3)
+    if len(resultDebug3) >= 3:
+        information_SP = [resultDebug3] + information_SP
+    
     for i in range(0,len(information_SP)):
         BoardsDataList = BoardsDataList +[information_SP[i]]
     
     BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
+    ProgressbarState(11)
     updateWINTo2(x, z, BoardsDataList)
     
 
@@ -807,6 +892,8 @@ class ItemSelector(QWidget):
 
         # Извлечь все элементы после него
         ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
+        
+
 
         # Проверка результата
         print(ResolveErrors)
@@ -814,6 +901,8 @@ class ItemSelector(QWidget):
 
         # Извлечь элементы после него
         ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
+
+        
 
         # Замены
         first_firmware_found = False
@@ -843,6 +932,19 @@ class ItemSelector(QWidget):
             ResolveErrors[i] = ResolveErrors[i].replace('",', "")
             ResolveErrors[i] = ResolveErrors[i].replace('"Revision', "Revision")
         ResolveErrors.pop()
+        required_bios_keys = ["BMC Version", "Bios Version", "IR-AX-HU Firmware Version", "CPLD Version"]
+        #ResolveErrors = [e for e in ResolveErrors if "AQFPB_FFC Version" not in e]
+        if '"IR_AX_RM": "no"' in ResolveErrors:
+            ResolveErrors.remove('"IR_AX_RM": "no"')
+        if '"AQFPB_FFC Version": "no"' in ResolveErrors:
+            ResolveErrors.remove('"AQFPB_FFC Version": "no"')
+        # Объединяем все строки списка в одну строку
+        joined_errors = " ".join(ResolveErrors)
+
+        # Добавляем отсутствующие BIOS ключи в начало списка (в нужном порядке)
+        for bios_key in reversed(required_bios_keys):  # reversed, чтобы порядок сохранился после вставки в начало
+            if bios_key not in joined_errors:
+                ResolveErrors.insert(0, f'"{bios_key}": "no"')
         # Результат
         print(ResolveErrors)
         ResolveErrors_1 = ResolveErrors
@@ -865,7 +967,7 @@ class ItemSelector(QWidget):
         required_elements = ["IR_AX_HU", "AQFPB_FFC", "IR_AX_RM", "AQC621AB"]
         for element in required_elements:
             if not any(element in line for line in from_revision):
-                missing_line = f'"{element}_Revision": "no"'
+                missing_line = f'"{element} Revision": "no"'
                 from_revision.append(missing_line)
 
         print("\nС 'Revision' и после:")
@@ -1065,6 +1167,16 @@ class ItemSelector(QWidget):
                 </span>
             '''
             self.i1p_label.setText(html)
+            self.i1p_label.setFixedWidth(320)
+            self.i1p_label.setStyleSheet('''
+        QLabel {
+            border: 2px solid #333;
+            border-radius: 5px;
+            
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+    ''')
 
         update_label()
 
@@ -1545,10 +1657,12 @@ class App(QWidget):
             ip = ip_input.text().strip()
             ok_button.setEnabled(False)
             if self.is_valid_ip_format(ip):
+                time.sleep(0.5)
                 self.ping_ip(ip, lambda success: ok_button.setEnabled(success))
 
         # При выборе IP из выпадающего списка — подставить в поле ввода
         ip_combo.currentIndexChanged.connect(
+            
             lambda: ip_input.setText(ip_combo.currentText() if ip_combo.currentIndex() > 0 else "")
         )
 
@@ -1562,6 +1676,7 @@ class App(QWidget):
     def is_valid_ip_format(self, ip):
         parts = ip.split('.')
         if len(parts) != 4:
+            
             return False
         for part in parts:
             if not part.isdigit():
@@ -1582,7 +1697,8 @@ class App(QWidget):
                 success = False
             QTimer.singleShot(0, lambda: callback(success))
 
-        QTimer.singleShot(100, run_ping)
+        QTimer.singleShot(80, run_ping)
+        
 
     def on_ok_pressed(self, ip_input_value, ip_combo_value, dialog):
         global ipAddr
@@ -1654,7 +1770,7 @@ def ProgressbarSrceenON():
     ProgressbarSrceenOFF()
 
     # === Встроенный массив подписей ===
-    progress_texts = ["Очистка Системы", "Получение названий плат", "Получение деревьев BUCSTL", "Получение информации по BUCSTL", "Получение информации по RedFish", "Создание общего списка", "Передача данных в интерфейс"]
+    progress_texts = ["Очистка Системы", "Получение состаяния сервера", "Получение ID и TOKEN", "Получение нформации по HU", "Получение firmware и hardware", "Получение названий плат", "Получение данных по платам","Получение нформации по Ipmi", "Получение информации по BUCSTL", "Получение информации по RedFish",  "Готово"]
 
     # Создаём затемнение
     overlay_widget = QWidget(main_window)
@@ -1681,7 +1797,7 @@ def ProgressbarSrceenON():
     progress_dots = []
     progress_labels = []
 
-    for i in range(7):
+    for i in range(11):
         row = QHBoxLayout()
         row.setAlignment(Qt.AlignLeft)
         row.setSpacing(15)  # ⬅️ Отступ между точкой и текстом
@@ -1705,7 +1821,7 @@ def ProgressbarSrceenON():
     progress_bar = QProgressBar()
     
     progress_bar.setMinimum(0)
-    progress_bar.setMaximum(7)
+    progress_bar.setMaximum(11)
     progress_bar.setValue(0)
     progress_bar.setStyleSheet("""
         QProgressBar {
@@ -1731,28 +1847,30 @@ def ProgressbarSrceenON():
 
 def ProgressbarState(j):
     """
-    Обновляет точки и прогресс-бар в зависимости от переданного j
+    Обновляет точку с индексом j-1 в зеленый,
+    остальные точки не меняются.
+    Обновляет прогресс-бар в зависимости от количества зеленых точек.
     """
     global progress_dots, progress_bar
 
-    for i, dot in enumerate(progress_dots):
-        if i < j:
-            dot.setStyleSheet("color: limegreen;")
-        else:
-            dot.setStyleSheet("color: gray;")
+    index = j - 1
 
+    if 0 <= index < len(progress_dots):
+        progress_dots[index].setStyleSheet("color: limegreen;")
+
+    # Подсчитываем количество зеленых точек
+    green_count = 0
+    for dot in progress_dots:
+        # Проверяем стиль, если цвет limegreen — считаем
+        style = dot.styleSheet()
+        if "limegreen" in style:
+            green_count += 1
+
+    # Обновляем прогресс-бар (максимум 7)
     if progress_bar:
-        progress_bar.setValue(j)
-    def animate_progress_bar(to_value, duration=500):
-        global progress_bar
-        if not progress_bar:
-            return
+        progress_bar.setValue(green_count)
 
-        animation = QPropertyAnimation(progress_bar, b"value")
-        animation.setDuration(duration)  # длительность анимации в мс
-        animation.setStartValue(progress_bar.value())
-        animation.setEndValue(to_value)
-        animation.start(QPropertyAnimation.DeleteWhenStopped)
+
 
 
 def ProgressbarSrceenOFF():

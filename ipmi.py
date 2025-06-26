@@ -12,13 +12,13 @@ def GetIpmiData(ipAddr):
             allSDR = SDR82.split(("!"))
         #print(allSDR)
         cSDR = []
-        for i in allSDR:
-            i = i.replace("| ns","")
-            i = i.replace("| ok","")
-            i = i.replace("| nr","")
-            while " " in i:
-                i = i.replace(" ","")
+        for FixSDRValue in allSDR:
+            FixSDRValue = FixSDRValue.replace("| ns","")
+            FixSDRValue = FixSDRValue.replace("| ok","")
+            FixSDRValue = FixSDRValue.replace("| nr","")
+            while " " in FixSDRValue:
+                FixSDRValue = FixSDRValue.replace(" ","")
                 
-            cSDR =cSDR+[i]
+            cSDR =cSDR+[FixSDRValue]
         #print(cSDR)
         return cSDR,allSDR

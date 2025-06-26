@@ -37,33 +37,33 @@ def GetRedfishData(TrueID, TrueToken,ipAddr,SENSOR_NAME_LIST,all5):
     #print(len(all5SP))
     print("3")
     #ProgressbarState(5)
-    with open("ABC.txt", "r") as file72: #чтение файла с данными на пользовательской стороне
-        content52 = file72.read()
-        print(content52)
+    with open("ABC.txt", "r") as ClientDataValues: #чтение файла с данными на пользовательской стороне
+        ClientDataStrings = ClientDataValues.read()
+        print(ClientDataStrings)
             
             
-        content82 = '\n'.join(line + '!' for line in content52.splitlines())
-        all51 = content82.split(("!"))
-    print(all51)
-    all52 = []
-    for content52 in all51:
-        if ("message" not in content52) and ("SSLerror" not in content52):
-            parts = content52.split('.')
-            avb = parts[0]
-            parts7 = parts[len(parts)-1]
-            parts7 = parts7[:3]
-            content52 = avb +'.'+ parts7
+        FixClientDataStrings = '\n'.join(line + '!' for line in ClientDataStrings.splitlines())
+        SplitClientDataStrings = FixClientDataStrings.split(("!"))
+    print(SplitClientDataStrings)
+    FinalClientData = []
+    for DataString in SplitClientDataStrings:
+        if ("message" not in DataString) and ("SSLerror" not in DataString):
+            SplitDataString = DataString.split('.')
+            BeforePointDataString = SplitDataString[0]
+            FixDataString = SplitDataString[len(SplitDataString)-1]
+            FixDataString = FixDataString[:3]
+            DataString = BeforePointDataString +'.'+ FixDataString
                 
-            content52.replace(",","")
-            content52 = content52.replace(": null,.\n  ",": nulll")
-            if content52 != ".":
-                all52 = all52 + [content52]
-        if "was not found" in content52:
-            all52 = all52 + ["\n"+'"'+" Reading"+'"'+": NotInstalled_"]#OpenSSL SSL_read: error
-        if ("SSLerror" in content52):#not found
-            all52 = all52 + ["\n"+'"'+" Reading"+'"'+": SSL_Error_"]
-        #if ("not found" in content52):#not found
-            #all52 = all52 + ["\n"+'"'+"Reading"+'"'+": not found"]
-    #print(all52)
-        
-    return all52,RedFishList
+            DataString.replace(",","")
+            DataString = DataString.replace(": null,.\n  ",": nulll")
+            if DataString != ".":
+                FinalClientData = FinalClientData + [DataString]
+        if "was not found" in DataString:
+            FinalClientData = FinalClientData + ["\n"+'"'+" Reading"+'"'+": NotInstalled_"]#OpenSSL SSL_read: error
+        if ("SSLerror" in DataString):#not found
+            FinalClientData = FinalClientData + ["\n"+'"'+" Reading"+'"'+": SSL_Error_"]
+        #if ("not found" in ClientDataStrings):#not found
+            #FinalClientData = FinalClientData + ["\n"+'"'+"Reading"+'"'+": not found"]
+    #print(FinalClientData)
+    
+    return FinalClientData,RedFishList
