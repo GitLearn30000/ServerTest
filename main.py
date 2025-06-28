@@ -19,14 +19,11 @@ import time
 sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 scpConnectionString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 def StartProgramm(ipAddr):
-    #ProgressbarState(0)
     ProgressbarSrceenON()
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
         if os.path.exists(filename):
             os.remove(filename)
-            print("")#print(f"✅ Удалено: {filename}")
-        else:
-            print("")#print(f"❌ Не найдено: {filename}")
+
     ProgressbarState(1)
     
     os.system(sshConnectionString+ipAddr+" ipmitool power status"+" > PowerServer.txt")
@@ -37,9 +34,6 @@ def StartProgramm(ipAddr):
     print("Получено из фунцкии: ",TrueID, TrueToken)
     with open("PowerServer.txt", "r") as filePowerServer: #чтение файла с данными на пользовательской стороне
         contentPowerServer = filePowerServer.read()
-        print("")#print(contentPowerServer)
-            
-        
         PowerServer82 = '\n'.join(line + '!' for line in contentPowerServer.splitlines())
         allPowerServer = PowerServer82.split(("!"))
     print("")#print(allPowerServer[0])
@@ -106,8 +100,8 @@ def StartProgramm(ipAddr):
     print("")#print("dbusPath values:", DBusQwery_SP, len(DBusQwery_SP))
     print("")#print("PowerState values:", StateServer, len(StateServer))
 
-    # Если вам нужно сохранить все значения redfishPath в переменной all5
-    all5 = RedFishQwery_SP
+    # Если вам нужно сохранить все значения redfishPath в переменной ALLRedFishQwery_SP
+    ALLRedFishQwery_SP = RedFishQwery_SP
     
     #------------------------------------------------------------------------------
     #------------------------------------------------------------------------------
@@ -264,87 +258,87 @@ def StartProgramm(ipAddr):
         Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://'''+ipAddr+'''/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
         Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
         result2 = os.popen(Qwery1).read()
-        result3 = os.popen(Qwery2).read()
+        Debug2ndQwery = os.popen(Qwery2).read()
 
         
-        if result2 and result3:
+        if result2 and Debug2ndQwery:
             if len(result2) >= 1:
-                result2_1=result2.split("]")
-                if len(result2_1) ==2:
-                    result2_1_1=result2_1[0]
-                    result2_1_1=result2_1_1.replace("[\n","")
-                    while " " in result2_1_1:
-                        result2_1_1=result2_1_1.replace(" ","")
-                    while "," in result2_1_1:
-                        result2_1_1=result2_1_1.replace(",","")
-                    result2_1_1=result2_1_1.split("\n")
-                    result_222 = []
-                    for i0 in result2_1_1:
+                Split1stQwery=result2.split("]")
+                if len(Split1stQwery) ==2:
+                    HeaterTempSensor_Busctl_correcting=Split1stQwery[0]
+                    HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.replace("[\n","")
+                    while " " in HeaterTempSensor_Busctl_correcting:
+                        HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.replace(" ","")
+                    while "," in HeaterTempSensor_Busctl_correcting:
+                        HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.replace(",","")
+                    HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.split("\n")
+                    HeaterTempSensor_SP_Redfish = []
+                    for i0 in HeaterTempSensor_Busctl_correcting:
                         if len(i0) >= 2:
                             if i0 != "null":
                                 number = float(i0)
                                 i0 = f"{number:.2f}"
-                                result_222=result_222+[i0]
+                                HeaterTempSensor_SP_Redfish=HeaterTempSensor_SP_Redfish+[i0]
                             if i0 == "null":
-                                result_222=result_222+["null"]
+                                HeaterTempSensor_SP_Redfish=HeaterTempSensor_SP_Redfish+["null"]
 
 
                 
                 
-                result2_1_2=result2_1[1]
-                result2_1_2=result2_1_2.split('"')
-                result2_1_2=result2_1_2[len(result2_1_2)-1]
-                result2_1_2=result2_1_2.replace("\n","")
-                number = float(result2_1_2)
-                result2_1_2 = f"{number:.2f}"
-            if len(result3) >= 1:
-                result3=result3.replace(".Humidity","")
-                result3=result3.replace(".Temperatures","")
-                result3=result3.replace("emits-change","",10)
-                result3=result3.replace("property  d","",10)
-                result3=result3.replace("property","",10)
-                result3=result3.replace("\n","",10)
-                result3=result3.split("ad")
+                HeaterHUMIDSensor_SP_Redfish=Split1stQwery[1]
+                HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish.split('"')
+                HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish[len(HeaterHUMIDSensor_SP_Redfish)-1]
+                HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish.replace("\n","")
+                number = float(HeaterHUMIDSensor_SP_Redfish)
+                HeaterHUMIDSensor_SP_Redfish = f"{number:.2f}"
+            if len(Debug2ndQwery) >= 1:
+                Debug2ndQwery=Debug2ndQwery.replace(".Humidity","")
+                Debug2ndQwery=Debug2ndQwery.replace(".Temperatures","")
+                Debug2ndQwery=Debug2ndQwery.replace("emits-change","",10)
+                Debug2ndQwery=Debug2ndQwery.replace("property  d","",10)
+                Debug2ndQwery=Debug2ndQwery.replace("property","",10)
+                Debug2ndQwery=Debug2ndQwery.replace("\n","",10)
+                Debug2ndQwery=Debug2ndQwery.split("ad")
                 
-                if len(result3) ==2:
-                    result3_1=result3[0]
-                    result3_1=result3_1.split(" ")
-                    Res3_1=""
-                    for i1 in result3_1:
+                if len(Debug2ndQwery) ==2:
+                    Split2ndQwery=Debug2ndQwery[0]
+                    Split2ndQwery=Split2ndQwery.split(" ")
+                    HeaterHUMIDSensor_SP_Busctl=""
+                    for i1 in Split2ndQwery:
                         if len(i1) >= 4:
                             number = float(i1)
                             i1 = f"{number:.2f}"
-                            Res3_1 = i1
-                    result3_2=result3[1]
-                    result3_2=result3_2.split(" ")
-                    print("Result3_2 ", result3_2)
-                    Res3_2=[]
-                    for i2 in result3_2:
+                            HeaterHUMIDSensor_SP_Busctl = i1
+                    HeaterTempSensor_Redfish_correcting=Debug2ndQwery[1]
+                    HeaterTempSensor_Redfish_correcting=HeaterTempSensor_Redfish_correcting.split(" ")
+                    print("HeaterTempSensor_Redfish_correcting ", HeaterTempSensor_Redfish_correcting)
+                    HeaterTempSensor_SP_Bucstl=[]
+                    for i2 in HeaterTempSensor_Redfish_correcting:
                         
                         if len(i2) >= 2:
                             if i2 != "nan":
                                 number = float(i2)
                                 i2 = f"{number:.2f}"
-                                Res3_2 = Res3_2 + [i2]
+                                HeaterTempSensor_SP_Bucstl = HeaterTempSensor_SP_Bucstl + [i2]
                             if i2 == "nan":
-                                Res3_2 = Res3_2 + ["nan"]
+                                HeaterTempSensor_SP_Bucstl = HeaterTempSensor_SP_Bucstl + ["nan"]
 
                     #print("Result2 ", result2)
-                    #print("Result3 ", result3)
-                    print("Result2-1 ", result_222)
-                    print("Result2-2 ", result2_1_2)
-                    print("Result3_1 ", Res3_1)
-                    print("Result3_2 ", Res3_2)
+                    #print("Debug2ndQwery ", Debug2ndQwery)
+                    print("Result2-1 ", HeaterTempSensor_SP_Redfish)
+                    print("Result2-2 ", HeaterHUMIDSensor_SP_Redfish)
+                    print("Split2ndQwery ", HeaterHUMIDSensor_SP_Busctl)
+                    print("HeaterTempSensor_Redfish_correcting ", HeaterTempSensor_SP_Bucstl)
         
-            if (len(result2_1_2) and len(Res3_1)) >= 1:
-                end_dict["HEATER_HUMID-0!"+result2_1_2+"!"+Res3_1+"!-"]="IR-AX-HU"
+            if (len(HeaterHUMIDSensor_SP_Redfish) and len(HeaterHUMIDSensor_SP_Busctl)) >= 1:
+                end_dict["HEATER_HUMID-0!"+HeaterHUMIDSensor_SP_Redfish+"!"+HeaterHUMIDSensor_SP_Busctl+"!-"]="IR-AX-HU"
         
         
-            if (len(result_222) and len(Res3_2)) >= 1:
-                for i in range(0,len(Res3_2)):
+            if (len(HeaterTempSensor_SP_Redfish) and len(HeaterTempSensor_SP_Bucstl)) >= 1:
+                for i in range(0,len(HeaterTempSensor_SP_Bucstl)):
                     i = int(i)
-                    print(str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-")
-                    end_dict[str("HEATER_TEMP-"+str(i)+"!"+result_222[i]+"!"+Res3_2[i])+"!-"]="IR-AX-HU"+str(i)
+                    print(str("HEATER_TEMP-"+str(i)+"!"+HeaterTempSensor_SP_Redfish[i]+"!"+HeaterTempSensor_SP_Bucstl[i])+"!-")
+                    end_dict[str("HEATER_TEMP-"+str(i)+"!"+HeaterTempSensor_SP_Redfish[i]+"!"+HeaterTempSensor_SP_Bucstl[i])+"!-"]="IR-AX-HU"+str(i)
             
             print("End_dict:  ",end_dict)
         
@@ -444,7 +438,7 @@ def StartProgramm(ipAddr):
     #exit()
     print("")#print("0")
     
-    #all5 = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
+    #ALLRedFishQwery_SP = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
     # Загрузка данных из файла paths.json
     
     
@@ -453,7 +447,7 @@ def StartProgramm(ipAddr):
     def run_all_functions(ipAddr):
         funcs = {
             1: (GetFirmwareVersions, (ipAddr,)),
-            2: (GetRedfishData, (TrueID, TrueToken, ipAddr, SENSOR_NAME_LIST, all5)),
+            2: (GetRedfishData, (TrueID, TrueToken, ipAddr, SENSOR_NAME_LIST, ALLRedFishQwery_SP)),
             3: (GetBusctlData, (DBusQwery_SP, ipAddr)),
             4: (BoardNames, ()),
             5: (GetBoardsDATA, ()),
@@ -529,7 +523,7 @@ def StartProgramm(ipAddr):
         ClienT = ClienT[:-1]
         SerVer1 = FinalServerData[i].split(" ")
         SerVer2 = SerVer1[1]
-        ert = 0
+        cycle_break= 0
         #AQRZ2_U4P1_R_TMP
         Redfish_Link = RedFishList[i]
         MQ = RedFishList[i]
@@ -542,108 +536,96 @@ def StartProgramm(ipAddr):
             
         
 
-        if ert == 0:
-            if ert == 0:
-                if ert == 0:
-                    if ert == 0:
-                        if ert == 0:
-                            if ert == 0:
-                                if ert == 0:
-                                    for SDRvalue in cSDR:
-                                        if name in SDRvalue:
-                                            if ert == 0:
-                                                print("")#print(i)
-                                                #print("")#print(len(FinalClientData))
-                                                #print("")#print(len(FinalServerData))
-                                                
-                                                
-                                                
 
-                                                SDRvalue=SDRvalue.replace("\n","")
-                                                SDRvalue=SDRvalue.replace(str(SensorNames[i]+"|"),"")
-                                                SDRvalue=SDRvalue.replace(str("degreesC"),"°C")
-                                                SDRvalue=SDRvalue.replace(str("Volts"),"V")#percent
-                                                SDRvalue=SDRvalue.replace(str("percent"),"%")
-                                                SDRvalue=SDRvalue.replace(str("Watts"),"W")
-                                                SDRvalue=SDRvalue.replace(str("Amps"),"A")
-                                                SDRvalue=SDRvalue.replace(str("RPM")," RPM")
-                                                BoardValue = Redfish_Link
-                                                BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Chassis","")
-                                                BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Baseboard","")#SIL_STS4
-                                                #BoardValue=BoardValue.replace("AQFPB_FFC"," AQFPB-FFC ")
-                                                #BoardValue=BoardValue.replace("AQRZ2_U4P1_R_TMP","AQRZ2_U4P1_R")
-                                                BoardValue=BoardValue.replace("SIL_STS4","Server_Chassis")#SIL_STS4_TMP
-                                                BoardValue=BoardValue.replace("SYS_FAN1_RPM","Server_Chassis")#AQRZ2_U4P1_R_TMP
-                                                BoardValue=BoardValue.replace("SYS_FAN2_PWM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN1_PWM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN6_PWM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN5_RPM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN6_RPM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN5_PWM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("SYS_FAN2_RPM","Server_Chassis")
-                                                BoardValue=BoardValue.replace("ACC100_A_TMP","1Server_Chassis1")
-                                                BoardValue=BoardValue.replace("ACC100_E_TMP","2Server_Chassis2")
-                                                BoardValue=BoardValue.replace("ACC100_W_TMP","3Server_Chassis3")
-                                                BoardValue=BoardValue.replace("PSU_TTL_OUT_PWR","Server_Chassis")
-                                                BoardValue=BoardValue.replace("PVPP_ABCD_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVNN_PCH_AX_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVDDQ_ABCD_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_A_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_B_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_F_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_C_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_H_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVDDQ_EFGH_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCIO_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("P1V8_PCH_AX_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("3V_BAT_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("P12V_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCANA_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("TEMP1_OUT_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCIN_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCIO_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVDDQ_EFGH_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_P1V8_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVDDQ_ABCD_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_G_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("P1V05_PCH_AX_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PVPP_EFGH_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCIN_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_D_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_DTS_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("DDR4_E_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_PVCCSA_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("P3V3_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("CPU1_P1V8_VLT"," Server_Board ")
-                                                BoardValue=BoardValue.replace("TEMP2_IN_TMP"," Server_Board ")
-                                                BoardValue=BoardValue.replace("PSU1_IN_VLT","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_OUT_PWR","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_OUT_VLT","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_IN_PWR","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_IN_AMP","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_FAN_RPM","PSU1")
-                                                BoardValue=BoardValue.replace("fanpwm_PSU1_FAN_PWM","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_OUT_AMP","PSU1")
-                                                BoardValue=BoardValue.replace("PSU1_IN_TMP","PSU1")
-                                                BoardValue=BoardValue.replace("fanpwm_PSU2_FAN_PWM","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_IN_VLT","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_OUT_AMP","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_FAN_RPM","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_IN_PWR","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_OUT_VLT","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_OUT_PWR","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_IN_TMP","PSU2")
-                                                BoardValue=BoardValue.replace("PSU2_IN_AMP","PSU2")
-                                                
-                                                xmSensor = str(SENSOR_NAME_LIST[i] + "!"+ClienT  +  "!"+ SerVer2 +"!")
-                                                while " " in xmSensor:
-                                                    xmSensor=xmSensor.replace(" ","")
-                                                end_dict[xmSensor+str(SDRvalue)] = BoardValue#+ "!!!!!!"+RedFishList[i]
-                                                
-                                                dub = dub + [xmSensor+str(SDRvalue)]
-                                                
-                                                #print(name)
-                                                ert = 1
+        for SDRvalue in cSDR:
+            if name in SDRvalue:
+                if cycle_break== 0:
+                    
+                    SDRvalue=SDRvalue.replace("\n","")
+                    SDRvalue=SDRvalue.replace(str(SensorNames[i]+"|"),"")
+                    SDRvalue=SDRvalue.replace(str("degreesC"),"°C")
+                    SDRvalue=SDRvalue.replace(str("Volts"),"V")#percent
+                    SDRvalue=SDRvalue.replace(str("percent"),"%")
+                    SDRvalue=SDRvalue.replace(str("Watts"),"W")
+                    SDRvalue=SDRvalue.replace(str("Amps"),"A")
+                    SDRvalue=SDRvalue.replace(str("RPM")," RPM")
+                    BoardValue = Redfish_Link
+                    BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Chassis","")
+                    BoardValue=BoardValue.replace("AQUARIUS_AQC621AB_Baseboard","")#SIL_STS4
+                    #BoardValue=BoardValue.replace("AQFPB_FFC"," AQFPB-FFC ")
+                    #BoardValue=BoardValue.replace("AQRZ2_U4P1_R_TMP","AQRZ2_U4P1_R")
+                    BoardValue=BoardValue.replace("SIL_STS4","Server_Chassis")#SIL_STS4_TMP
+                    BoardValue=BoardValue.replace("SYS_FAN1_RPM","Server_Chassis")#AQRZ2_U4P1_R_TMP
+                    BoardValue=BoardValue.replace("SYS_FAN2_PWM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN1_PWM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN6_PWM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN5_RPM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN6_RPM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN5_PWM","Server_Chassis")
+                    BoardValue=BoardValue.replace("SYS_FAN2_RPM","Server_Chassis")
+                    BoardValue=BoardValue.replace("ACC100_A_TMP","1Server_Chassis1")
+                    BoardValue=BoardValue.replace("ACC100_E_TMP","2Server_Chassis2")
+                    BoardValue=BoardValue.replace("ACC100_W_TMP","3Server_Chassis3")
+                    BoardValue=BoardValue.replace("PSU_TTL_OUT_PWR","Server_Chassis")
+                    BoardValue=BoardValue.replace("PVPP_ABCD_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVNN_PCH_AX_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVDDQ_ABCD_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_A_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_B_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_F_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_C_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_H_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVDDQ_EFGH_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIO_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("P1V8_PCH_AX_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("3V_BAT_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("P12V_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCANA_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("TEMP1_OUT_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIN_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIO_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVDDQ_EFGH_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_P1V8_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVDDQ_ABCD_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_G_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("P1V05_PCH_AX_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVPP_EFGH_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIN_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_D_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_DTS_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("DDR4_E_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCSA_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("P3V3_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("CPU1_P1V8_VLT"," Server_Board ")
+                    BoardValue=BoardValue.replace("TEMP2_IN_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("PSU1_IN_VLT","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_OUT_PWR","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_OUT_VLT","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_IN_PWR","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_IN_AMP","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_FAN_RPM","PSU1")
+                    BoardValue=BoardValue.replace("fanpwm_PSU1_FAN_PWM","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_OUT_AMP","PSU1")
+                    BoardValue=BoardValue.replace("PSU1_IN_TMP","PSU1")
+                    BoardValue=BoardValue.replace("fanpwm_PSU2_FAN_PWM","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_IN_VLT","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_OUT_AMP","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_FAN_RPM","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_IN_PWR","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_OUT_VLT","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_OUT_PWR","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_IN_TMP","PSU2")
+                    BoardValue=BoardValue.replace("PSU2_IN_AMP","PSU2")
+
+                    xmSensor = str(SENSOR_NAME_LIST[i] + "!"+ClienT  +  "!"+ SerVer2 +"!")
+                    while " " in xmSensor:
+                        xmSensor=xmSensor.replace(" ","")
+                    end_dict[xmSensor+str(SDRvalue)] = BoardValue#+ "!!!!!!"+RedFishList[i]
+
+                    dub = dub + [xmSensor+str(SDRvalue)]
+
+                    #print(name)
+                    cycle_break= 1
     
     #i=i+1
     #print("")#print(len(SENSOR_NAME_LIST))
@@ -699,7 +681,7 @@ def StartProgramm(ipAddr):
     x = FinalBoardsList
     print("")#print(x)
     print("")#print(z)
-    print("")#print(all5)
+    print("")#print(ALLRedFishQwery_SP)
     print("")#print("-------------------")
     print("")#print(cSDR)
     print("")#print("FinalClientData",len(FinalClientData))
@@ -736,7 +718,7 @@ def StartProgramm(ipAddr):
         json.dump(result, f, indent=4)
 
     print("")#print("Данные успешно сохранены в paths.json")'''
-    #print("")#print(all5SP)
+    #print("")#print(ALLRedFishQwery_SPSP)
     #print("")#print(end_dict)
     #print("")#print(SENSOR_NAME_LIST)
     #print("")#print(DebugList)

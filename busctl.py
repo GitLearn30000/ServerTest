@@ -16,8 +16,8 @@ def GetBusctlData(DBusQwery_SP,ipAddr):
         
         
         DBusQwery_SPEND = []
-        for qwe23 in DBusQwery_SP:
-            DBusQwery_SPEND = DBusQwery_SPEND + [str("echo 1  && ")+qwe23+str(" &>> CBA.txt\n")]
+        for DBusQwery in DBusQwery_SP:
+            DBusQwery_SPEND = DBusQwery_SPEND + [str("echo 1  && ")+DBusQwery+str(" &>> CBA.txt\n")]
         #ProgressbarState(3)
         myString = ''.join(DBusQwery_SPEND)
         f = open( 'Complete.txt', 'w' )

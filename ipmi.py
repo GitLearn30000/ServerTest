@@ -8,8 +8,8 @@ def GetIpmiData(ipAddr):
             #print(contentSDR)
                 
             
-            SDR82 = '\n'.join(line + '!' for line in contentSDR.splitlines())
-            allSDR = SDR82.split(("!"))
+            SDRFixFileLines = '\n'.join(line + '!' for line in contentSDR.splitlines())
+            allSDR = SDRFixFileLines.split(("!"))
         #print(allSDR)
         cSDR = []
         for FixSDRValue in allSDR:
