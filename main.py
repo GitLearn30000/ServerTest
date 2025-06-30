@@ -14,7 +14,6 @@ from redfish import GetRedfishData
 from IDandToken import GetIDandToken
 import re
 import time
-#10.12.140.137
 
 sshConnectionString = "sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
 scpConnectionString = "sshpass -p 0penBmc scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@"
@@ -23,6 +22,7 @@ def StartProgramm(ipAddr):
     for filename in ["CBA.txt", "ABC.txt","Sdr.txt", "PowerServer.txt"]:
         if os.path.exists(filename):
             os.remove(filename)
+    
 
     ProgressbarState(1)
     
@@ -36,23 +36,17 @@ def StartProgramm(ipAddr):
         contentPowerServer = filePowerServer.read()
         PowerServer82 = '\n'.join(line + '!' for line in contentPowerServer.splitlines())
         allPowerServer = PowerServer82.split(("!"))
-    print("")#print(allPowerServer[0])
-    ProgressbarState(2)
-    
 
+    ProgressbarState(2)
     #------------------------------------------------------------------------------
-    #------------------------------------------------------------------------------
-    #------------------------------------------------------------------------------
-    #тут редактировать обработку Json для RedFish
-    
     # Загрузка данных из файла paths.json
     with open('paths.json', 'r', encoding='utf-8') as file:
         GetDataFromFile = json.load(file)
 
     # Инициализация пустых списков для хранения значений
-    RedFishQwery_SP = []
+    RedFishQuery_SP = []
     SensorNames = []
-    DBusQwery_SP = []
+    DBusQuery_SP = []
     StateServer = []
     serverstate = ""
     if "is on" in allPowerServer[0]:
@@ -83,54 +77,40 @@ def StartProgramm(ipAddr):
     # Функция для добавления значений в списки
     def add_values(data):
         if "redfishPath" in data:
-            RedFishQwery_SP.append(data["redfishPath"])
+            RedFishQuery_SP.append(data["redfishPath"])
         if "sensorName" in data:
             SensorNames.append(data["sensorName"])
         if "dbusPath" in data:
-            DBusQwery_SP.append(data["dbusPath"])
+            DBusQuery_SP.append(data["dbusPath"])
         if "PowerState" in data:
             StateServer.append(data["PowerState"])
 
-    # Начало извлечения
     FilePathsData(GetDataFromFile)
-
-    # Вывод результата
-    print("")#print("redfishPath values:", RedFishQwery_SP, len(RedFishQwery_SP))
-    print("")#print("sensorName values:", SensorNames, len(SensorNames))
-    print("")#print("dbusPath values:", DBusQwery_SP, len(DBusQwery_SP))
-    print("")#print("PowerState values:", StateServer, len(StateServer))
-
-    # Если вам нужно сохранить все значения redfishPath в переменной ALLRedFishQwery_SP
-    ALLRedFishQwery_SP = RedFishQwery_SP
+    ALLRedFishQuery_SP = RedFishQuery_SP
     
     #------------------------------------------------------------------------------
-    #------------------------------------------------------------------------------
-    #------------------------------------------------------------------------------
-    
-    
-    
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
-    CurlRequest = "curl -k -u root:0penBmc -L https://"
+    CurlRequest = "curl -s -k -u root:0penBmc -L https://"
+    Bios_Query = CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion"
+    BiosResultCurl = os.popen(Bios_Query).read()
+    print("BiosResultCurl",BiosResultCurl,Bios_Query)
+    BiosResultCurl=BiosResultCurl.replace(',\n',"")
 
     def GetFirmwareVersions(ipAddr):
-        a = datetime.datetime.now()
-        #curl -k -u root:0penBmc -L https://172.26.24.21/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version
+        #a = datetime.datetime.now()
+        IR_AX_HU_Query = CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion"
         
-        DebugQuery1 = CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion"
-        DebugQuery2 = CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion"
-
-        DebugQuery4 = CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version"
-        #/redfish/v1/Chassis/AQRZ2_U4P1_R | grep Revision
-        #Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
+        CPLD_Query = CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version"
         
-        resultDebug1 = os.popen(DebugQuery1).read()
-        resultDebug2 = os.popen(DebugQuery2).read()
-        resultDebug4 = os.popen(DebugQuery4).read()
-        print("resultDebug1",resultDebug1,DebugQuery1)
-        print("resultDebug2",resultDebug2,DebugQuery2)
         
-        print("resultDebug4",resultDebug4,DebugQuery4)
+        CPLD_ResultCurl = os.popen(CPLD_Query).read()
+        IR_AX_HU_ResultCurl = os.popen(IR_AX_HU_Query).read()
+        
+        print("IR_AX_HU_ResultCurl",IR_AX_HU_ResultCurl,IR_AX_HU_Query)
+        
+        
+        print("CPLD_ResultCurl",CPLD_ResultCurl,CPLD_Query)
         os.system("echo  > informationversion.txt")
 
         def insert_before_last_line(filepath, line_to_insert):
@@ -144,7 +124,7 @@ def StartProgramm(ipAddr):
 
             with open(filepath, 'w') as f:
                 f.writelines(lines)
-        print("ok 1")
+        
         def run_and_insert(endpoint, comment):
             url = f"{CurlRequest}{ipAddr}{endpoint}"
             try:
@@ -170,60 +150,34 @@ def StartProgramm(ipAddr):
         run_and_insert("/redfish/v1/Chassis/IR_AX_RM_Board", "IR_AX_RM")
         run_and_insert("/redfish/v1/Chassis/AQUARIUS_AQC621AB_Baseboard", "AQC621AB")
         run_and_insert("/redfish/v1/Chassis/AQRZ2_U4P1_R", "AQRZ2_U4P1_R")
-        #run_and_insert("/redfish/v1/Chassis/AQRZ2_U4P1_R", "AQRZ2_U4P1_R")
-        #os.system(CurlRequest+ipAddr+"/redfish/v1/Chassis/AQRZ2_U4P1_R | grep Revision >> informationversion.txt")
-        print("ok 2")
-
+        
         
         with open("informationversion.txt", "r") as informationfile: #чтение файла с данными на серверной стороне
             informationType = informationfile.read()
-            print("")#print(informationType)
-            #informationSTR = '\n'.join(line + '!' for line in informationType.splitlines())
+            #print(informationType)
             information_SP = informationType.split(("\n"))
         while '' in information_SP:
             information_SP.remove('')
         print("ok 3")
-        if len(resultDebug1) >= 5:
-            resultDebug1=resultDebug1.replace(",\n","")
-            resultDebug1=resultDebug1.replace("FirmwareVersion","IR-AX-HU Firmware Version")
-            information_SP =  [resultDebug1] + information_SP
-        if len(resultDebug2) >= 5:
-            resultDebug2=resultDebug2.replace(",\n","")#BiosVersion
-            resultDebug2=resultDebug2.replace("BiosVersion","Bios Version")
-            information_SP = [resultDebug2] + information_SP 
-        
+        if len(IR_AX_HU_ResultCurl) >= 5:
+            IR_AX_HU_ResultCurl=IR_AX_HU_ResultCurl.replace(",\n","")
+            IR_AX_HU_ResultCurl=IR_AX_HU_ResultCurl.replace("FirmwareVersion","IR-AX-HU Firmware Version")
+            information_SP =  [IR_AX_HU_ResultCurl] + information_SP
+         
             
-        if len(resultDebug4) >= 5:
-            resultDebug4=resultDebug4.replace(",\n","")
-            resultDebug4=resultDebug4.replace("Version","CPLD Version")
-            information_SP = [resultDebug4] + information_SP
-        print("")#print(information_SP)
-        print("ok 4")
-        b = datetime.datetime.now()
-        print("")#print("Time difference for getting GetFirmwareVersions = ", b -a)
-        '''print("information_SP[0] ",information_SP[0])
-        print("information_SP[1] ",information_SP[1])
-        print("information_SP[2] ",information_SP[2])
-        print("information_SP[3] ",information_SP[3])
-        print("information_SP[4] ",information_SP[4])
-        print("information_SP[5] ",information_SP[5])
-        print("information_SP[6] ",information_SP[6])'''
+        if len(CPLD_ResultCurl) >= 5:
+            CPLD_ResultCurl=CPLD_ResultCurl.replace(",\n","")
+            CPLD_ResultCurl=CPLD_ResultCurl.replace("Version","CPLD Version")
+            information_SP = [CPLD_ResultCurl] + information_SP
+        #b = datetime.datetime.now()
+        #print("Time difference for getting GetFirmwareVersions = ", b -a)
         print(information_SP)
         if len(information_SP) == 0:
             information_SP = information_SP + ['"error": "GetFirmwareVersions"']
-        #information_SP.pop()
         for i, item in enumerate(information_SP):
             if "Version" in item:
-                bios_item = information_SP.pop(i)  # удалить найденный элемент
-                information_SP.insert(0, bios_item)  # вставить в начало
-        
-
-        
-            
-                
-        
-            
-        # Результат
+                bios_item = information_SP.pop(i)
+                information_SP.insert(0, bios_item)
         print("Обновлённый information_SP:")
         print(information_SP)
         for i in range(0,len(information_SP)):
@@ -235,7 +189,7 @@ def StartProgramm(ipAddr):
             if i <= 8 and i >= 4:
                 if "Revision" not in information_SP[i]:
                     information_SP[i]=information_SP[i].replace("IR_AX_RM","IR_AX_RM Revision")
-                    information_SP[i]=information_SP[i].replace("AQC621AB","AQC621AB Revision")#"AQFPB_FFC "Revision"
+                    information_SP[i]=information_SP[i].replace("AQC621AB","AQC621AB Revision")
                     information_SP[i]=information_SP[i].replace("AQRZ2_U4P1_R_","AQRZ2_U4P1_R Revision")
                     information_SP[i]=information_SP[i].replace("AQRZ2_U4P1_R","AQRZ2_U4P1_R Revision")
                     information_SP[i]=information_SP[i].replace("IR_AX_HU_","IR_AX_HU Revision")
@@ -244,28 +198,24 @@ def StartProgramm(ipAddr):
                     information_SP[i]=information_SP[i].replace("AQFPB_FFC_","AQFPB_FFC Revision")
                     information_SP[i]=information_SP[i].replace("AQFPB_FFC","AQFPB_FFC Revision")
                     
-                
-            
             information_SP[i]=information_SP[i].replace("_Rev"," Rev")
         return information_SP
     
     def HU_GetInfo():
-        end_dict = {}
-        
+        end_dict = {}        
         
         print("end_dict: ",end_dict)
-        a = datetime.datetime.now()
-        Qwery1 = '''curl -s -k -u root:0penBmc -X GET "https://'''+ipAddr+'''/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
-        Qwery2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
-        result2 = os.popen(Qwery1).read()
-        Debug2ndQwery = os.popen(Qwery2).read()
+        #a = datetime.datetime.now()
+        Query1 = '''curl -s -k -u root:0penBmc -X GET "https://'''+ipAddr+'''/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit" | jq '.Temperatures,.FirmwareVersion,.Humidity' '''
+        Query2 = '''sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@'''+ipAddr+''' 'busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "Temperatures\|Humidity " && exit' '''
+        ResultQuery1 = os.popen(Query1).read()
+        ResultQuery2 = os.popen(Query2).read()
 
-        
-        if result2 and Debug2ndQwery:
-            if len(result2) >= 1:
-                Split1stQwery=result2.split("]")
-                if len(Split1stQwery) ==2:
-                    HeaterTempSensor_Busctl_correcting=Split1stQwery[0]
+        if ResultQuery1 and ResultQuery2:
+            if len(ResultQuery1) >= 1:
+                Split1stQuery=ResultQuery1.split("]")
+                if len(Split1stQuery) ==2:
+                    HeaterTempSensor_Busctl_correcting=Split1stQuery[0]
                     HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.replace("[\n","")
                     while " " in HeaterTempSensor_Busctl_correcting:
                         HeaterTempSensor_Busctl_correcting=HeaterTempSensor_Busctl_correcting.replace(" ","")
@@ -285,49 +235,47 @@ def StartProgramm(ipAddr):
 
                 
                 
-                HeaterHUMIDSensor_SP_Redfish=Split1stQwery[1]
+                HeaterHUMIDSensor_SP_Redfish=Split1stQuery[1]
                 HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish.split('"')
                 HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish[len(HeaterHUMIDSensor_SP_Redfish)-1]
                 HeaterHUMIDSensor_SP_Redfish=HeaterHUMIDSensor_SP_Redfish.replace("\n","")
                 number = float(HeaterHUMIDSensor_SP_Redfish)
                 HeaterHUMIDSensor_SP_Redfish = f"{number:.2f}"
-            if len(Debug2ndQwery) >= 1:
-                Debug2ndQwery=Debug2ndQwery.replace(".Humidity","")
-                Debug2ndQwery=Debug2ndQwery.replace(".Temperatures","")
-                Debug2ndQwery=Debug2ndQwery.replace("emits-change","",10)
-                Debug2ndQwery=Debug2ndQwery.replace("property  d","",10)
-                Debug2ndQwery=Debug2ndQwery.replace("property","",10)
-                Debug2ndQwery=Debug2ndQwery.replace("\n","",10)
-                Debug2ndQwery=Debug2ndQwery.split("ad")
+            if len(ResultQuery2) >= 1:
+                ResultQuery2=ResultQuery2.replace(".Humidity","")
+                ResultQuery2=ResultQuery2.replace(".Temperatures","")
+                ResultQuery2=ResultQuery2.replace("emits-change","",10)
+                ResultQuery2=ResultQuery2.replace("property  d","",10)
+                ResultQuery2=ResultQuery2.replace("property","",10)
+                ResultQuery2=ResultQuery2.replace("\n","",10)
+                ResultQuery2=ResultQuery2.split("ad")
                 
-                if len(Debug2ndQwery) ==2:
-                    Split2ndQwery=Debug2ndQwery[0]
-                    Split2ndQwery=Split2ndQwery.split(" ")
+                if len(ResultQuery2) ==2:
+                    Split2ndQuery=ResultQuery2[0]
+                    Split2ndQuery=Split2ndQuery.split(" ")
                     HeaterHUMIDSensor_SP_Busctl=""
-                    for i1 in Split2ndQwery:
+                    for i1 in Split2ndQuery:
                         if len(i1) >= 4:
                             number = float(i1)
                             i1 = f"{number:.2f}"
                             HeaterHUMIDSensor_SP_Busctl = i1
-                    HeaterTempSensor_Redfish_correcting=Debug2ndQwery[1]
+                    HeaterTempSensor_Redfish_correcting=ResultQuery2[1]
                     HeaterTempSensor_Redfish_correcting=HeaterTempSensor_Redfish_correcting.split(" ")
                     print("HeaterTempSensor_Redfish_correcting ", HeaterTempSensor_Redfish_correcting)
                     HeaterTempSensor_SP_Bucstl=[]
-                    for i2 in HeaterTempSensor_Redfish_correcting:
+                    for HeaterTempSensor in HeaterTempSensor_Redfish_correcting:
                         
-                        if len(i2) >= 2:
-                            if i2 != "nan":
-                                number = float(i2)
-                                i2 = f"{number:.2f}"
-                                HeaterTempSensor_SP_Bucstl = HeaterTempSensor_SP_Bucstl + [i2]
-                            if i2 == "nan":
+                        if len(HeaterTempSensor) >= 2:
+                            if HeaterTempSensor != "nan":
+                                number = float(HeaterTempSensor)
+                                HeaterTempSensor = f"{number:.2f}"
+                                HeaterTempSensor_SP_Bucstl = HeaterTempSensor_SP_Bucstl + [HeaterTempSensor]
+                            if HeaterTempSensor == "nan":
                                 HeaterTempSensor_SP_Bucstl = HeaterTempSensor_SP_Bucstl + ["nan"]
 
-                    #print("Result2 ", result2)
-                    #print("Debug2ndQwery ", Debug2ndQwery)
-                    print("Result2-1 ", HeaterTempSensor_SP_Redfish)
-                    print("Result2-2 ", HeaterHUMIDSensor_SP_Redfish)
-                    print("Split2ndQwery ", HeaterHUMIDSensor_SP_Busctl)
+                    print("ResultQuery1-1 ", HeaterTempSensor_SP_Redfish)
+                    print("ResultQuery1-2 ", HeaterHUMIDSensor_SP_Redfish)
+                    print("Split2ndQuery ", HeaterHUMIDSensor_SP_Busctl)
                     print("HeaterTempSensor_Redfish_correcting ", HeaterTempSensor_SP_Bucstl)
         
             if (len(HeaterHUMIDSensor_SP_Redfish) and len(HeaterHUMIDSensor_SP_Busctl)) >= 1:
@@ -341,27 +289,14 @@ def StartProgramm(ipAddr):
                     end_dict[str("HEATER_TEMP-"+str(i)+"!"+HeaterTempSensor_SP_Redfish[i]+"!"+HeaterTempSensor_SP_Bucstl[i])+"!-"]="IR-AX-HU"+str(i)
             
             print("End_dict:  ",end_dict)
-        
-
-
-
-        #os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
-        #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        #os.system("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
-        #os.system(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
-        
         else:
-            end_dict["hu_error_error"] = "hu_error"#os.system(scpConnectionString+ipAddr+":/home/root/Extra.txt ./")
+            end_dict["hu_error_error"] = "hu_error"
         
         return end_dict
-    
-    
     os.system(sshConnectionString+ipAddr+" 'rm Extra.txt'")
-    
-    #ipmitool sdr
 
     def BoardNames():
-        a = datetime.datetime.now()
+        #a = datetime.datetime.now()
         os.system(sshConnectionString+ipAddr+" ipmitool fru | grep "+'"'+"FRU Device Description"+'"'+" > BoardNamesList.txt") #ipmitool fru | grep "FRU Device Description"> BoardNamesList.txt
         os.system(scpConnectionString+ipAddr+":/home/root/BoardNamesList.txt ./")
         with open("BoardNamesList.txt", "r") as FileBoardNamesList: #чтение файла с данными на пользовательской стороне
@@ -393,7 +328,7 @@ def StartProgramm(ipAddr):
     
         #FixBoardsNames = FixBoardsNames + ["AQUARIUS_AQC621AB"]
     def GetBoardsDATA():
-        a = datetime.datetime.now()
+        #a = datetime.datetime.now()
         os.system(sshConnectionString+ipAddr+" ipmitool fru > BoardsDATA.txt") #ipmitool fru | grep "FRU Device Description"> BoardNamesList.txt
         os.system(scpConnectionString+ipAddr+":/home/root/BoardsDATA.txt ./")
         #FixBoardsNames = FixBoardsNames +  ["Server_Chassis"]
@@ -438,7 +373,7 @@ def StartProgramm(ipAddr):
     #exit()
     print("")#print("0")
     
-    #ALLRedFishQwery_SP = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
+    #ALLRedFishQuery_SP = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
     # Загрузка данных из файла paths.json
     
     
@@ -447,8 +382,8 @@ def StartProgramm(ipAddr):
     def run_all_functions(ipAddr):
         funcs = {
             1: (GetFirmwareVersions, (ipAddr,)),
-            2: (GetRedfishData, (TrueID, TrueToken, ipAddr, SENSOR_NAME_LIST, ALLRedFishQwery_SP)),
-            3: (GetBusctlData, (DBusQwery_SP, ipAddr)),
+            2: (GetRedfishData, (TrueID, TrueToken, ipAddr, SENSOR_NAME_LIST, ALLRedFishQuery_SP)),
+            3: (GetBusctlData, (DBusQuery_SP, ipAddr)),
             4: (BoardNames, ()),
             5: (GetBoardsDATA, ()),
             6: (GetIpmiData, (ipAddr,)),
@@ -469,10 +404,6 @@ def StartProgramm(ipAddr):
                     results[i] = None
                     print(f"Функция {i} вызвала исключение: {e}")
 
-                # Явный вызов TestFun с каждым номером функции через if
-                #progress_texts = ["6 получение firmware и hardware", "7 Получение названий плат", "8 Получение данных по платам", 
-                # "4 Получение информации по BUCSTL", "5 Получение информации по RedFish", 
-                # "9 Получение нформации по Ipmi", "10 Получение нформации по HU"]
                 if i == 1:
                     ProgressbarState(5)#
                 elif i == 2:
@@ -627,118 +558,27 @@ def StartProgramm(ipAddr):
                     #print(name)
                     cycle_break= 1
     
-    #i=i+1
-    #print("")#print(len(SENSOR_NAME_LIST))
-    #print("")#print(len(RedFishList))
-    #print("")#print(RedFishList)
-    #print("")#print(FinalServerData)
-    #ProgressbarState(6)
-        
-    #print("")#print(DO_LIST)
-    #print("")#print("Отмеченные предметы:", items)
-        
-    #exit()
-    #os.remove("ABC.txt") #удаление файлов
-    #os.remove("CBA.txt") #удаление файлов
+
     os.system(sshConnectionString+ipAddr+" touch CBA.txt") #создание пустого файла
     
-    x = selected_items
-
-
-
-    #Failed to get property Value on interface xyz
-
-
-    z = end_dict
-    
-    #{"iphone": "AQUARIUS_AQC621AB_Chassis/", "ipad": "AQUARIUS_AQC621AB_Chassis/", "iead": "AQUARIUS_AQC621AB_Baseboard/"}
-    print("")#print(FinalClientData)
-    print("")#print(FinalServerData)
-    print("")#print(FixBoardsNames)
+    #x = selected_items
+    #z = end_dict
     ProgressbarSrceenOFF()
-    
-    
-    
-    ExtraGAV = []
-    
-
-   
-
     ForErrorBoardData = 0
     for w in FixBoardsNames:
-        z["NoData!NoData!NoData"+str(ForErrorBoardData)] = w
+        end_dict["NoData!NoData!NoData"+str(ForErrorBoardData)] = w
         ForErrorBoardData = ForErrorBoardData + 1
-    x = x + ["Server_Chassis"]
+    selected_items = selected_items + ["Server_Chassis"]
     FinalBoardsList = []
     TempCount = 0
-    for cat in x:
+    for cat in selected_items:
         print("")#print(cat)
         if TempCount == 0:
             FinalBoardsList = FinalBoardsList + ["Server_Board"]
         if TempCount >= 1:
             FinalBoardsList = FinalBoardsList + [cat]
         TempCount = TempCount + 1
-    x = FinalBoardsList
-    print("")#print(x)
-    print("")#print(z)
-    print("")#print(ALLRedFishQwery_SP)
-    print("")#print("-------------------")
-    print("")#print(cSDR)
-    print("")#print("FinalClientData",len(FinalClientData))
-    print("")#print("FinalServerData",len(FinalServerData))
-    print("")#print("cSDR",len(cSDR))
-    print("")#print(FinalClientData)
-    print("")#print(FinalServerData)
-    print("")#print("-------------------")
-    print("")#print("-------------------")
-    print("")#print("-------------------")
-    #print("")#print(cONLY_NAME_SENSOR)
-    #print("")#print(len(cONLY_NAME_SENSOR))
-    print("")#print(FinalServerData)
-    print("")#print("-------------------")
-    print("")#print("-------------------")
-    print("")#print("-------------------")
-    #print("")#print(sur)
-    #print("")#print(end_dict)
-    print("")#print(SENSOR_NAME_LIST)
-    #print("")#print(RedFishList)
-    # Преобразуем строки в список словарей
-    
-    result = []
-    '''for item in data:
-        parts = item.split("&")
-        result.append({
-            "sensorName": parts[0],
-            "dbusPath": parts[1],
-            "redfishPath": parts[2]
-        })
-
-    # Сохраняем в файл paths.json
-    with open("paths.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=4)
-
-    print("")#print("Данные успешно сохранены в paths.json")'''
-    #print("")#print(ALLRedFishQwery_SPSP)
-    #print("")#print(end_dict)
-    #print("")#print(SENSOR_NAME_LIST)
-    #print("")#print(DebugList)
-    
-    #print("")#print(allSDR)
-    #print("")#print("Extra: ",ExtraGAV)#HEATER_TEMP
-    #print("")#print("HEATER_TEMP FISH: ",ExtraGAV[0])
-    #print("")#print("HEATER_TEMP BUS: ",ExtraGAV[1])
-    #print("")#print("HEATER_HUMID FISH: ",ExtraGAV[2])
-    #print("")#print("HEATER_HUMID BUS: ",ExtraGAV[3])
-    #if len(ExtraGAV) >= 4:
-        #z["HEATER_TEMP "+str(ExtraGAV[0])+" "+ str(ExtraGAV[1])+" -"] = "IR-AX-HU1"
-        #z["HEATER_HUMID "+str(ExtraGAV[2])+" "+ str(ExtraGAV[3])+" -"] = "IR-AX-HU2"
-    #print("")#print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 | grep [0-9] >> Extra.txt")
-    #print("")#print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt")
-    #print("")#print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'""'+" >> Extra.txt")
-    #print("")#print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity"+'"'+" >> Extra.txt")
-    #print("")#print(FinalClientData)
-    #print("")#print(allPowerServer[0])
-    #print("")#print(z)
+    selected_items = FinalBoardsList
     os.system("rm *.txt")
     print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
     print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
@@ -749,20 +589,24 @@ def StartProgramm(ipAddr):
     DebugQuery3 = CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion"
     resultDebug3 = os.popen(DebugQuery3).read()
     print("resultDebug3",resultDebug3,DebugQuery3)
+    DebugQuery3=DebugQuery3.replace(',\n',"")
     if len(resultDebug3) >= 3:
+        
         information_SP = [resultDebug3] + information_SP
+    
+    if len(BiosResultCurl) >= 3:
+        
+        information_SP = [BiosResultCurl] + information_SP
     
     for i in range(0,len(information_SP)):
         BoardsDataList = BoardsDataList +[information_SP[i]]
     
     BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
     ProgressbarState(11)
-    updateWINTo2(x, z, BoardsDataList)
+    updateWINTo2(selected_items, end_dict, BoardsDataList)
     
-
 ipAddr = ""
 main_window = None
-
 
 class ItemSelector(QWidget):
     def __init__(self, items, options_dict, DataBoardsFinalData=None):
@@ -809,9 +653,6 @@ class ItemSelector(QWidget):
                 # Добавьте нужные замены
             }
 
-            # 🔄 Словарь замен имён (если нужно — можно вынести в init или отдельный метод)
-            
-
             # 🆗 Создаём заменённое имя для анализа, не меняя оригинал
             lookup_item = item_replacements.get(item, item)
 
@@ -836,7 +677,6 @@ class ItemSelector(QWidget):
                 for key, values in self.options_dict.items()
             )
 
-
             # Печатаем результат промежуточных проверок
             print("")#print(f"⚠️ Найдена ошибка (ERROR : NoData): {is_error_InData}")
             print("")#print(f"📊 Есть данные (has_data): {has_data}")
@@ -860,13 +700,10 @@ class ItemSelector(QWidget):
             # Добавляем в list_widget
             self.list_widget.addItem(list_item)
 
-
-
         left_split.addWidget(self.list_widget)
         #print("")#print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
         print("")#print(DataBoardsFinalData)
-                # Таблица с версиями
-        
+        # Таблица с версиями     
 
         # IP секция
         print("DataBoardsFinalData: ", DataBoardsFinalData)
@@ -874,8 +711,6 @@ class ItemSelector(QWidget):
 
         # Извлечь все элементы после него
         ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
-        
-
 
         # Проверка результата
         print(ResolveErrors)
@@ -883,8 +718,6 @@ class ItemSelector(QWidget):
 
         # Извлечь элементы после него
         ResolveErrors = DataBoardsFinalData[last_empty_index + 1:]
-
-        
 
         # Замены
         first_firmware_found = False
@@ -955,8 +788,6 @@ class ItemSelector(QWidget):
         print("\nС 'Revision' и после:")
         
         print(from_revision)
-
-        
 
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
@@ -1087,31 +918,11 @@ class ItemSelector(QWidget):
                 # Добавление в layout
                 ip_layout.addWidget(self.version_table2)
         
-        #self.ip_label = QLabel(" ")
-        #self.ip_label.setFixedWidth(900)
 
-        
-        # Создание выпадающего списка для ввода IP-адреса
-        #self.ip_combo = QComboBox(self)
-        #self.ip_combo.setPlaceholderText("Например: 192.168.0.10")
-        
-        # Загрузка IP-адресов из JSON
-        #self.load_ip_addresses_from_json()
-
-        #self.ip_input = QLineEdit(self)
-        #self.ip_input.setPlaceholderText("Введите новый IP, если его нет в списке.")
-        
-        #self.confirm_button = QPushButton("Подтвердить")
-        #self.confirm_button.clicked.connect(self.confirm_ip)
-
-        # Кнопки ВКЛ и ВЫКЛ
-        self.buttons_layout = QHBoxLayout()  # Горизонтальный layout для кнопок
-        
-        # Обработка статуса и IP
+        self.buttons_layout = QHBoxLayout()
         def turn_on(self):
             global ipAddr
             print("")#print(f"Включение устройства с IP: {ipAddr}")
-            # Замените на вашу команду для включения
             os.system(sshConnectionString+ipAddr+" ipmitool power on")
 
         def turn_off(self):
@@ -1174,40 +985,11 @@ class ItemSelector(QWidget):
 
         self.i1p_label.mousePressEvent = handle_label_click
 
-
-        
-        
-
-        
-
-
-        # Подключение сигнала выбора IP из комбобокса к полю ввода
-        #self.ip_combo.currentTextChanged.connect(self.update_ip_input_from_combo)
-
-        #ip_layout.addWidget(self.ip_label)
-        
-        #ip_layout.addWidget(self.ip_combo)  # Добавляем комбобокс вместо поля ввода
-        #ip_layout.addWidget(self.ip_input)  # Оставляем поле ввода для новых IP
-        #ip_layout.addWidget(self.confirm_button)
-
-        # Добавляем кнопки
         ip_layout.addLayout(self.buttons_layout)
         #ip2_label
         ip_layout.addWidget(self.ip2_label)
-        
-        
-        
-
         ip_layout.addWidget(self.i1p_label)
-
-        # Размещение в левом разделе (если он есть)
         left_split.addWidget(ip_section)
-
-
-        #print("")#print(DataBoardsFinalData[-4])
-        #print("")#print(DataBoardsFinalData[-3])
-        #print("")#print(DataBoardsFinalData[-2])
-
 
         # Таблица
         self.main_table = QTableWidget(self)
@@ -1220,15 +1002,10 @@ class ItemSelector(QWidget):
         main_h_layout.addWidget(self.main_table, 4)
 
         self.list_widget.itemChanged.connect(self.on_item_changed)
-
-    
-
     def update_ip_input_from_combo(self, text):
         # Автозаполнение поля ввода при выборе IP из списка
         self.ip_input.setText(text)
 
-    
-    
     def turn_on(self):
         global ipAddr
         print("")#print(f"Включение устройства с IP: {ipAddr}")
@@ -1710,12 +1487,12 @@ class App(QWidget):
         print("")#print("Выключение устройства")
         os.system(sshConnectionString+ipAddr+" ipmitool power off")
 
-    def updateWINTo2(self, x, y, DataBoardsFinalData=None):
+    def updateWINTo2(self, selected_items, end_dict, DataBoardsFinalData=None):
         if self.page2:
             self.stack.removeWidget(self.page2)
             self.page2.deleteLater()
 
-        self.page2 = ItemSelector(x, y, DataBoardsFinalData)
+        self.page2 = ItemSelector(selected_items, end_dict, DataBoardsFinalData)
         self.stack.addWidget(self.page2)
         self.stack.setCurrentWidget(self.page2)
 
@@ -1725,9 +1502,9 @@ class App(QWidget):
 
 
 
-def updateWINTo2(x, z, DataBoardsFinalData=None):
+def updateWINTo2(selected_items, end_dict, DataBoardsFinalData=None):
     if main_window:
-        main_window.updateWINTo2(x, z, DataBoardsFinalData)
+        main_window.updateWINTo2(selected_items, end_dict, DataBoardsFinalData)
 # === Глобальные переменные ===
 overlay_widget = None
 progress_overlay = None
