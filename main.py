@@ -96,7 +96,8 @@ def StartProgramm(ipAddr):
     BiosResultCurl = os.popen(Bios_Query).read()
     print("BiosResultCurl",BiosResultCurl,Bios_Query)
     BiosResultCurl=BiosResultCurl.replace(',\n',"")
-
+    os.system('''curl -k -u root:0penBmc -L https://172.26.24.31/redfish/v1/Managers/bmc/ManagerDiagnosticData > CurlMB.txt''')
+    
     def GetFirmwareVersions(ipAddr):
         #a = datetime.datetime.now()
         IR_AX_HU_Query = CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion"
@@ -158,7 +159,7 @@ def StartProgramm(ipAddr):
             information_SP = informationType.split(("\n"))
         while '' in information_SP:
             information_SP.remove('')
-        print("ok 3")
+        
         if len(IR_AX_HU_ResultCurl) >= 5:
             IR_AX_HU_ResultCurl=IR_AX_HU_ResultCurl.replace(",\n","")
             IR_AX_HU_ResultCurl=IR_AX_HU_ResultCurl.replace("FirmwareVersion","IR-AX-HU Firmware Version")
@@ -369,16 +370,7 @@ def StartProgramm(ipAddr):
         print("")#print("Time difference for getting GetBoardsDATA = ", b -a)
         
         return FileDataWithExtra,BoardsDataList
-    
-    #exit()
-    print("")#print("0")
-    
-    #ALLRedFishQuery_SP = ['/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_A_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_E_TMP','/Chassis/SILICOM_Pomona_Lake_1/Sensors/temperature_SIL_ACC100_W_TMP','/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_1', '/Chassis/AQUARIUS_AQC621AB_Chassis/PowerSubsystem/PowerSupplies/ASPOWER_1600W_PSU_2', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU1_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_IN_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/current_PSU2_OUT_AMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU1_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_PSU2_FAN_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN1_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN2_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN5_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fanpwm_SYS_FAN6_PWM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU1_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_PSU2_FAN_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN1_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN2_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN5_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/fantach_SYS_FAN6_RPM', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU1_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_IN_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/power_PSU2_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU1_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/temperature_PSU2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU1_OUT_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_IN_VLT', '/Chassis/AQUARIUS_AQC621AB_Chassis/Sensors/voltage_PSU2_OUT_VLT', '/Chassis/AQFPB_FFC/Sensors/temperature_AQFPB_FFC_TMP', '/Chassis/AQRZ2_U4P1_R/Sensors/temperature_AQRZ2_U4P1_R_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/power_PSU_TTL_OUT_PWR', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_DTS_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_P1V8_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_CPU1_PVCCIO_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_B_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_C_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_D_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_E_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_F_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_G_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_DDR4_H_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_ABCD_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_PVDDQ_EFGH_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP1_OUT_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/temperature_TEMP2_IN_TMP', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_3V_BAT_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_P1V8_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCANA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIN_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCIO_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_CPU1_PVCCSA_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P12V_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V05_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P1V8_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_P3V3_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVDDQ_EFGH_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVNN_PCH_AX_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_ABCD_VLT', '/Chassis/AQUARIUS_AQC621AB_Baseboard/Sensors/voltage_PVPP_EFGH_VLT', '/Chassis/P425G410G8TS81_XR_Silicom_STS4/Sensors/temperature_SIL_STS4_TMP']
-    # Загрузка данных из файла paths.json
-    
-    
-    
-    
+
     def run_all_functions(ipAddr):
         funcs = {
             1: (GetFirmwareVersions, (ipAddr,)),
@@ -579,7 +571,7 @@ def StartProgramm(ipAddr):
             FinalBoardsList = FinalBoardsList + [cat]
         TempCount = TempCount + 1
     selected_items = FinalBoardsList
-    os.system("rm *.txt")
+    #os.system("rm *.txt")
     print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Temperatures"+'"'+" -A7 > Extra.txt && echo ------- >> Extra.txt")
     print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Temperatures"+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
     print("curl -s -k -u root:0penBmc -X GET "+'"'+"https://"+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem"+'"'+"/Aquarius_Irteya/HeatingUnit | grep "+'"'+"Humidity"+'\\'+'""'+" >> Extra.txt && echo ------- >> Extra.txt")
@@ -603,6 +595,23 @@ def StartProgramm(ipAddr):
     
     BoardsDataList=BoardsDataList+["SERVER is "+str(serverstate)+" "+ipAddr]
     ProgressbarState(11)
+    
+    CurlMB_SP = []
+
+    with open("CurlMB.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            if re.search(r'"[^"]+"\s*:\s*[0-9]+(?:\.[0-9]+)?', line):
+                CurlMB_SP.append(line.strip())
+
+    # Если end_dict не существует, создаём пустой
+    try:
+        end_dict
+    except NameError:
+        end_dict = {}
+
+    for i, line in enumerate(CurlMB_SP):
+        end_dict[line] = f"CurlMB{i}"
+        #end_dict[linef"CurlMB{i}_dup"] = line  # дублируем значение с другим ключом
     updateWINTo2(selected_items, end_dict, BoardsDataList)
     
 ipAddr = ""
@@ -611,11 +620,18 @@ main_window = None
 class ItemSelector(QWidget):
     def __init__(self, items, options_dict, DataBoardsFinalData=None):
         super().__init__()
+        #self.setWindowTitle("Пример с двумя кнопками")
+        #self.setGeometry(100, 100, 400, 300)
+
+        
         self.items = items
         self.options_dict = options_dict
+        print(options_dict)
+        print(items)
         self.dialogs = {}
         self.DataBoardsFinalData = DataBoardsFinalData or []
         self.setDisabled(False)
+        
 
         self.layout = QVBoxLayout(self)  # Главный вертикальный layout
 
@@ -640,7 +656,8 @@ class ItemSelector(QWidget):
         # Левая часть
         left_split = QVBoxLayout()
         main_h_layout.addLayout(left_split, 1)
-
+        
+        
         # Список с галочками
         self.list_widget = QListWidget(self)
         for item in self.items:
@@ -699,7 +716,26 @@ class ItemSelector(QWidget):
 
             # Добавляем в list_widget
             self.list_widget.addItem(list_item)
+        # Основной центральный виджет и его layout
+        self.central_widget = QWidget()
+        #self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout(self.central_widget)
 
+        # Кнопки
+        self.button1 = QPushButton("Сенсоры")
+        self.button1.setFixedSize(500, 40)
+
+        self.button2 = QPushButton("Дисковое пространство")
+        self.button2.setFixedSize(500, 40)
+
+        self.button1.clicked.connect(self.Button1Page)
+        self.button2.clicked.connect(self.Button2Page)
+
+        # Добавляем кнопки в layout
+        self.layout.addWidget(self.button1)
+        self.layout.addWidget(self.button2)
+        left_split.addWidget(self.button1)
+        left_split.addWidget(self.button2)
         left_split.addWidget(self.list_widget)
         #print("")#print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
         print("")#print(DataBoardsFinalData)
@@ -936,11 +972,77 @@ class ItemSelector(QWidget):
         ip = parts[-1]
         status = ' '.join(parts[:-1])
         print("")#print("IP-адрес:", ip)
+        for key, value in options_dict.items():
+            if "CurlMB" in value:
+                print(f"{key} : {value}")
+        filtered_keys = [key for key, value in options_dict.items() if "CurlMB" in value]
+        # === Настройки ===
+        ScaleCurlMB = 0.8             # масштаб
+        base_font_size = 12
+        scaled_font_size = max(1, int(base_font_size * ScaleCurlMB))  # чтобы не стало 0
+
+        # Шрифт и метрика
+        font = QFont()
+        font.setPointSize(scaled_font_size)
+        metrics = QFontMetrics(font)
+
+        # Создание таблицы
+        self.tableCurlMB = QTableWidget(len(filtered_keys), 2)
+        self.tableCurlMB.setHorizontalHeaderLabels(["Название", "Значение"])
+        self.tableCurlMB.setFont(font)
+
+        # Определим минимальные ширины и высоты
+        min_col_widths = [0, 0]
+        min_row_heights = []
+
+        # Заполняем таблицу и рассчитываем размеры
+        for row, key in enumerate(filtered_keys):
+            if ':' in key:
+                left, right = key.split(':', 1)
+                left = left.strip()
+                right = right.strip()
+            else:
+                left = key.strip()
+                right = ""
+
+            item_left = QTableWidgetItem(left)
+            item_right = QTableWidgetItem(right)
+            item_left.setFont(font)
+            item_right.setFont(font)
+
+            self.tableCurlMB.setItem(row, 0, item_left)
+            self.tableCurlMB.setItem(row, 1, item_right)
+
+            # === Ширина текста ===
+            width_left = metrics.horizontalAdvance(left) + 16   # немного отступов
+            width_right = metrics.horizontalAdvance(right) + 16
+
+            min_col_widths[0] = max(min_col_widths[0], width_left)
+            min_col_widths[1] = max(min_col_widths[1], width_right)
+
+            # === Высота строки ===
+            text_height = metrics.height() + 8  # немного отступов
+            min_row_heights.append(text_height)
+
+        # === Устанавливаем минимальные размеры ===
+        for col, width in enumerate(min_col_widths):
+            self.tableCurlMB.setColumnWidth(col, width)
+            self.tableCurlMB.setMinimumWidth(sum(min_col_widths) + 20)  # общий минимум ширины таблицы
+
+        for row, height in enumerate(min_row_heights):
+            self.tableCurlMB.setRowHeight(row, height)
+
+        self.tableCurlMB.setMinimumHeight(sum(min_row_heights) + 80)  # минимум по высоте таблицы
+
+       
+        
+
 
         self.server_ip = ip
         self.current_status = 'on' if status == 'SERVER is on' else 'off'
         self.ip2_label = QLabel(ip)
         self.ip2_label.setFixedWidth(700)
+        self.ip3_label = QLabel("Дисковое пространство")
         self.i1p_label = QLabel()
         self.i1p_label.setCursor(QCursor(Qt.PointingHandCursor))
 
@@ -987,6 +1089,8 @@ class ItemSelector(QWidget):
 
         ip_layout.addLayout(self.buttons_layout)
         #ip2_label
+        ip_layout.addWidget(self.ip3_label)
+        ip_layout.addWidget(self.tableCurlMB)
         ip_layout.addWidget(self.ip2_label)
         ip_layout.addWidget(self.i1p_label)
         left_split.addWidget(ip_section)
@@ -1002,6 +1106,60 @@ class ItemSelector(QWidget):
         main_h_layout.addWidget(self.main_table, 4)
 
         self.list_widget.itemChanged.connect(self.on_item_changed)
+        self.button1.click()
+    
+
+
+    def Button1Page(self):
+        print("Кнопка 1 нажата")
+        self.ip3_label.hide() #какая то таблица
+        self.ip2_label.show() #ip 10.10.20.20
+        self.i1p_label.show() #кнока включение выключения
+        #self.ip_section.show() 
+        
+        self.main_table.show()
+        self.list_widget.show()
+        self.version_table.show()
+        self.version_table2.show()
+        self.hardware_label.show()
+        self.firmware_label.show()
+
+        self.tableCurlMB.hide()
+        
+        #self.clear_central_widget()
+        # Можно добавить что-то новое
+        label = QPushButton("Это страница кнопки 1 (назад)")
+        label.clicked.connect(self.init_buttons)
+        self.layout.addWidget(label)
+
+    def Button2Page(self):
+        print("Кнопка 2 нажата")
+
+
+        self.ip3_label.show() #какая то таблица
+        self.ip2_label.hide() #ip 10.10.20.20
+        self.i1p_label.hide() #кнока включение выключения
+        #self.ip_section.hide() 
+        
+        self.main_table.hide()
+        self.list_widget.hide()
+        self.version_table.hide()
+        self.version_table2.hide()
+        self.hardware_label.hide()
+        self.firmware_label.hide()
+
+        self.tableCurlMB.show()
+        #self.clear_central_widget()
+        # Можно добавить что-то новое
+        label = QPushButton("Это страница кнопки 2 (назад)")
+        label.clicked.connect(self.init_buttons)
+        self.layout.addWidget(label)
+
+    def init_buttons(self):
+        # Восстановление кнопок
+        self.clear_central_widget()
+        self.layout.addWidget(self.button1)
+        self.layout.addWidget(self.button2)
     def update_ip_input_from_combo(self, text):
         # Автозаполнение поля ввода при выборе IP из списка
         self.ip_input.setText(text)
@@ -1017,10 +1175,6 @@ class ItemSelector(QWidget):
         print("")#print(f"Выключение устройства с IP: {ipAddr}")
         # Замените на вашу команду для выключения
         os.system(sshConnectionString+ipAddr+" ipmitool power off")
-
-
-        
-
 
     def show_selected(self, selected_items):
         filtered_options = []
@@ -1312,8 +1466,6 @@ class ItemSelector(QWidget):
             if qws <= 2:
                 remove_scrollbar = True
 
-            
-
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         #scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -1343,10 +1495,6 @@ class ItemSelector(QWidget):
         dialog.setWindowModality(Qt.NonModal)
         dialog.show()
 
-
-
-
-
     def enable_overlay(self):
         if hasattr(self, 'overlay') and self.overlay:
             self.overlay.show()
@@ -1361,15 +1509,12 @@ class ItemSelector(QWidget):
         if hasattr(self, 'overlay') and self.overlay:
             self.overlay.hide()
 
-
-
-
 class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Состав оборудования")
-        self.setGeometry(0, 0, 2100, 1350)
-        self.setFixedSize(2100, 1350)
+        self.setGeometry(0, 0, 2100, 1800)
+        self.setFixedSize(2100, 1800)
 
         self.layout = QVBoxLayout(self)
         self.stack = QStackedLayout()
@@ -1458,7 +1603,6 @@ class App(QWidget):
 
         QTimer.singleShot(80, run_ping)
         
-
     def on_ok_pressed(self, ip_input_value, ip_combo_value, dialog):
         global ipAddr
         dialog.accept()
@@ -1472,8 +1616,6 @@ class App(QWidget):
 
         self.label.setText(f"Используется IP: {ipAddr}")
         StartProgramm(ipAddr)
-
-    
 
     def turn_on(self, ip_input_value):
         global ipAddr
@@ -1499,8 +1641,6 @@ class App(QWidget):
     def closeEvent(self, event):
         print("")#print("Закрытие приложения и всех окон.")
         QApplication.quit()
-
-
 
 def updateWINTo2(selected_items, end_dict, DataBoardsFinalData=None):
     if main_window:
@@ -1602,8 +1742,6 @@ def ProgressbarSrceenON():
     progress_overlay.show()
     overlay_widget.raise_()
 
-
-
 def ProgressbarState(j):
     """
     Обновляет точку с индексом j-1 в зеленый,
@@ -1628,9 +1766,6 @@ def ProgressbarState(j):
     # Обновляем прогресс-бар (максимум 7)
     if progress_bar:
         progress_bar.setValue(green_count)
-
-
-
 
 def ProgressbarSrceenOFF():
     """
