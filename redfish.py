@@ -19,20 +19,20 @@ def GetRedfishData(TrueID, TrueToken,ipAddr,SENSOR_NAME_LIST,ALLRedFishQwery_SP)
                 #ALLRedFishQwery_SPSP = ALLRedFishQwery_SPSP + ["curl -k 'https://"+ipAddr+""+"/redfish/v1"+i+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt"]
                 #StrDebug = str("curl -k 'https://"+ipAddr+"/"+i+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep -w " + "'"+"Reading" + "'"+ " | grep "+ '"' + ","+ '"' + " >> ABC.txt")
                 size_before = os.path.getsize(filename) if os.path.exists(filename) else 0
-                #print("size_before",size_before)
-                os.system("curl -k 'https://"+ipAddr+""+"/redfish/v1"+i+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep " + '"'+".Reading.:.*,\|message"+'"'+ " >> ABC.txt")
+                 #print("size_before",size_before)
+                os.system("curl -s -k 'https://"+ipAddr+""+"/redfish/v1"+i+ "' -H "+ "'X-Auth-Token: "+TrueToken+"'"+ " | grep " + '"'+".Reading.:.*,\|message"+'"'+ " >> ABC.txt")
                 size_after = os.path.getsize(filename)
                 print("size_after",size_after)
                 if size_after == size_before:
                     os.system(f'echo "SSLerror" >> ABC.txt')
-                RedFishList = RedFishList + [str("curl -k -u root:0penBmc -L https://"+ipAddr+""+i +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"')]
+                RedFishList = RedFishList + [str("curl -s -k -u root:0penBmc -L https://"+ipAddr+""+i +  " | grep -w " + "'"+"Reading" + "'"+ " |grep "+ '"' + ","+ '"')]
                 splitREdfishqwery = i.split("/")
                 DebugSplitREdfishqwery = splitREdfishqwery[2]
                 DO_LIST = DO_LIST + [len(DebugSplitREdfishqwery)-2]
                 allRedFISh = allRedFISh + [i]
     #print(ALLRedFishQwery_SPSP)
     #sur = "кол курлов"+str(len(ALLRedFishQwery_SPSP))+"кол сенсоров redfish"+str(len(ALLRedFishQwery_SP))+"кол сенсоров busctl"+str(len(SENSOR_NAME_LIST))
-    os.system("curl -k -X DELETE 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions/"+TrueID+"' -H 'X-Auth-Token: "+TrueToken+"'")
+    os.system("curl -s -k -X DELETE 'https://"+ipAddr+"/redfish/v1/SessionService/Sessions/"+TrueID+"' -H 'X-Auth-Token: "+TrueToken+"'")
     #curl -k -X DELETE 'https://<REDFISH-HOST>/redfish/v1/SessionService/Sessions/OkFPqcVCpP' -H 'X-Auth-Token: azKvFvVfPEoHvE5a8mtv'
     #print(len(ALLRedFishQwery_SPSP))
     print("3")

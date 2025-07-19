@@ -1,7 +1,7 @@
 import os
 import subprocess
 def GetIDandToken(ipAddr): 
-    Qwery = '''curl -k -D - -X POST 'https://'''+ipAddr+'''/redfish/v1/SessionService/Sessions' -H "Content-Type: application/json" -d '{ "UserName": "root", "Password": "0penBmc"}' | grep "X-Auth-Token\|Id"'''
+    Qwery = '''curl -s -k -D - -X POST 'https://'''+ipAddr+'''/redfish/v1/SessionService/Sessions' -H "Content-Type: application/json" -d '{ "UserName": "root", "Password": "0penBmc"}' | grep "X-Auth-Token\|Id"'''
     result = os.popen(Qwery).read()
     result = result.split("\n")
     TrueToken = result[0]

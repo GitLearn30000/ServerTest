@@ -96,7 +96,7 @@ def StartProgramm(ipAddr):
     BiosResultCurl = os.popen(Bios_Query).read()
     print("BiosResultCurl",BiosResultCurl,Bios_Query)
     BiosResultCurl=BiosResultCurl.replace(',\n',"")
-    os.system('''curl -k -u root:0penBmc -L https://172.26.24.31/redfish/v1/Managers/bmc/ManagerDiagnosticData > CurlMB.txt''')
+    os.system('''curl -s -k -u root:0penBmc -L https://'''+ipAddr+'''/redfish/v1/Managers/bmc/ManagerDiagnosticData > CurlMB.txt''')
     
     def GetFirmwareVersions(ipAddr):
         #a = datetime.datetime.now()
@@ -130,7 +130,8 @@ def StartProgramm(ipAddr):
             url = f"{CurlRequest}{ipAddr}{endpoint}"
             try:
                 # Выполнение curl | grep Revision
-                result = subprocess.check_output(f"{url} | grep Revision", shell=True, text=True)
+                result = subprocess.check_output(f"{url} | grep -E '\"Revision\"|\"Value\"' | paste -sd ' ' - | sed 's/\", *\"Value\": \"/ /g'", shell=True, text=True)
+
 
                 # Берем только первую строку результата
                 lines = result.strip().splitlines()
@@ -490,37 +491,37 @@ def StartProgramm(ipAddr):
                     BoardValue=BoardValue.replace("ACC100_E_TMP","2Server_Chassis2")
                     BoardValue=BoardValue.replace("ACC100_W_TMP","3Server_Chassis3")
                     BoardValue=BoardValue.replace("PSU_TTL_OUT_PWR","Server_Chassis")
-                    BoardValue=BoardValue.replace("PVPP_ABCD_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVNN_PCH_AX_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVDDQ_ABCD_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_A_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_B_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_F_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_C_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_H_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVDDQ_EFGH_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCIO_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("P1V8_PCH_AX_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("3V_BAT_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("P12V_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCANA_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("TEMP1_OUT_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCIN_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCIO_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVDDQ_EFGH_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_P1V8_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVDDQ_ABCD_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_G_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("P1V05_PCH_AX_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("PVPP_EFGH_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCIN_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_D_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_DTS_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("DDR4_E_TMP"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_PVCCSA_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("P3V3_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("CPU1_P1V8_VLT"," Server_Board ")
-                    BoardValue=BoardValue.replace("TEMP2_IN_TMP"," Server_Board ")
+                    BoardValue=BoardValue.replace("PVPP_ABCD_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVNN_PCH_AX_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVDDQ_ABCD_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_A_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_B_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_F_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_C_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_H_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVDDQ_EFGH_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIO_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("P1V8_PCH_AX_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("3V_BAT_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("P12V_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCANA_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("TEMP1_OUT_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIN_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIO_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVDDQ_EFGH_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_P1V8_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVDDQ_ABCD_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_G_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("P1V05_PCH_AX_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("PVPP_EFGH_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCIN_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_D_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_DTS_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("DDR4_E_TMP"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_PVCCSA_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("P3V3_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("CPU1_P1V8_VLT"," AQC621AB Motherboard ")
+                    BoardValue=BoardValue.replace("TEMP2_IN_TMP"," AQC621AB Motherboard ")
                     BoardValue=BoardValue.replace("PSU1_IN_VLT","PSU1")
                     BoardValue=BoardValue.replace("PSU1_OUT_PWR","PSU1")
                     BoardValue=BoardValue.replace("PSU1_OUT_VLT","PSU1")
@@ -566,7 +567,7 @@ def StartProgramm(ipAddr):
     for cat in selected_items:
         print("")#print(cat)
         if TempCount == 0:
-            FinalBoardsList = FinalBoardsList + ["Server_Board"]
+            FinalBoardsList = FinalBoardsList + ["AQC621AB Motherboard"]
         if TempCount >= 1:
             FinalBoardsList = FinalBoardsList + [cat]
         TempCount = TempCount + 1
@@ -667,6 +668,7 @@ class ItemSelector(QWidget):
             item_replacements = {
                 "AQRZ2_U4P1_R": "AQRZ2-U4P1-R",
                 "AQFPB_FFC": "AQFPB-FFC",
+                "AQFPB_FFC": "AQFPB-FFC",
                 # Добавьте нужные замены
             }
 
@@ -734,8 +736,8 @@ class ItemSelector(QWidget):
         # Добавляем кнопки в layout
         self.layout.addWidget(self.button1)
         self.layout.addWidget(self.button2)
-        left_split.addWidget(self.button1)
-        left_split.addWidget(self.button2)
+        #left_split.addWidget(self.button1)
+        #left_split.addWidget(self.button2)
         left_split.addWidget(self.list_widget)
         #print("")#print(DataBoardsFinalData[len(DataBoardsFinalData)-1])
         print("")#print(DataBoardsFinalData)
@@ -887,7 +889,14 @@ class ItemSelector(QWidget):
     
         #ip_layout.setContentsMargins(0, 0, 0, 0)
         self.hardware_label = QLabel("hardware")
+
+
         ip_layout.addWidget(self.hardware_label)
+
+
+
+        
+
         if len(from_revision)>=1:
             if "" == "":
                 
@@ -954,6 +963,26 @@ class ItemSelector(QWidget):
                 # Добавление в layout
                 ip_layout.addWidget(self.version_table2)
         
+        # Горизонтальный лейаут для firmware
+        firmware_layout = QVBoxLayout()
+        firmware_layout.addWidget(self.firmware_label)
+        firmware_layout.addWidget(self.version_table)
+        
+
+        # Горизонтальный лейаут для hardware
+        hardware_layout = QVBoxLayout()
+        hardware_layout.addWidget(self.hardware_label)
+        hardware_layout.addWidget(self.version_table2)
+        
+
+        # Общий вертикальный лейаут
+        combined_layout = QHBoxLayout()
+        combined_layout.addLayout(firmware_layout)
+        combined_layout.addLayout(hardware_layout)
+
+        # Добавляем в ip_layout (предположим, это тоже QVBoxLayout)
+        ip_layout.addLayout(combined_layout)
+        
 
         self.buttons_layout = QHBoxLayout()
         def turn_on(self):
@@ -978,7 +1007,7 @@ class ItemSelector(QWidget):
         filtered_keys = [key for key, value in options_dict.items() if "CurlMB" in value]
         # === Настройки ===
         ScaleCurlMB = 0.8             # масштаб
-        base_font_size = 12
+        base_font_size = 10
         scaled_font_size = max(1, int(base_font_size * ScaleCurlMB))  # чтобы не стало 0
 
         # Шрифт и метрика
@@ -1055,13 +1084,13 @@ class ItemSelector(QWidget):
         
         
         ip_select = ip
-        self.top_strings_button = QPushButton("TopStringsValues", self)
+        self.top_strings_button = QPushButton("Загрузка Системы")
         self.top_strings_button.clicked.connect(lambda: self.TopStringsValue(ip_select))
         
         # Создаём таблицу
         self.topTableValues = QTableWidget(self)
         self.topTableValues.setColumnCount(3)
-        self.topTableValues.setHorizontalHeaderLabels(["Колонка 1", "Колонка 2", "Колонка 3"])
+        self.topTableValues.setHorizontalHeaderLabels(["RAM", "CPU", "Модуль"])
 
         # Уменьшенный шрифт
         font = QFont("Courier New", 10)
@@ -1166,8 +1195,8 @@ class ItemSelector(QWidget):
             # HTML с увеличенной иконкой (60x60)
             html = f'''
                 <span>
-                    <img src="{icon_path}" width="40" height="40" style="vertical-align: middle;">
-                    <span style="font-size:40px; color:{'green' if self.current_status == 'on' else 'gray'};"> {status_text}</span>
+                    <img src="{icon_path}" width="20" height="20" style="vertical-align: middle;">
+                    <span style="font-size:20px; color:{'green' if self.current_status == 'on' else 'gray'};"> {status_text}</span>
                 </span>
             '''
             self.i1p_label.setText(html)
@@ -1201,11 +1230,33 @@ class ItemSelector(QWidget):
         ip_layout.addWidget(self.ip3_label)
         
         ip_layout.addWidget(self.tableCurlMB)
+        self.server_information = QLabel("server_information")
+        ip_layout.addWidget(self.server_information)
+        ip_layout.addWidget(self.Manufacturertable)
+                # Горизонтальный лейаут для firmware
+        CurlMB_layout = QVBoxLayout()
+        CurlMB_layout.addWidget(self.ip3_label)
+        CurlMB_layout.addWidget(self.tableCurlMB)
+        
+
+        # Горизонтальный лейаут для hardware
+        Manufacture_layout = QVBoxLayout()
+        Manufacture_layout.addWidget(self.server_information)
+        Manufacture_layout.addWidget(self.Manufacturertable)
+        
+
+        # Общий вертикальный лейаут
+        CurlMBandManufacture_layout = QHBoxLayout()
+        CurlMBandManufacture_layout.addLayout(CurlMB_layout)
+        CurlMBandManufacture_layout.addLayout(Manufacture_layout)
+
+        # Добавляем в ip_layout (предположим, это тоже QVBoxLayout)
+        ip_layout.addLayout(CurlMBandManufacture_layout)
         ip_layout.addWidget(self.top_strings_button)
         ip_layout.addWidget(self.topTableValues)
         ip_layout.addWidget(self.ip2_label)
         ip_layout.addWidget(self.i1p_label)
-        ip_layout.addWidget(self.Manufacturertable)
+        
         left_split.addWidget(ip_section)
 
         # Таблица
@@ -1283,7 +1334,7 @@ class ItemSelector(QWidget):
 
     def Button1Page(self):
         print("Кнопка 1 нажата")
-        self.ip3_label.hide()
+        '''self.ip3_label.hide()
         self.top_strings_button.hide()
         self.Manufacturertable.hide()#Manufacturertable
         self.topTableValues.hide() #какая то таблица topTableValues
@@ -1301,7 +1352,7 @@ class ItemSelector(QWidget):
         self.tableCurlMB.hide()
         
         #self.clear_central_widget()
-        # Можно добавить что-то новое
+        # Можно добавить что-то новое'''
         label = QPushButton("Это страница кнопки 1 (назад)")
         label.clicked.connect(self.init_buttons)
         self.layout.addWidget(label)
@@ -1310,7 +1361,7 @@ class ItemSelector(QWidget):
         print("Кнопка 2 нажата")
 
 
-        self.ip3_label.show() #какая то таблица
+        '''self.ip3_label.show() #какая то таблица
         self.top_strings_button.show() 
         self.Manufacturertable.show()
         self.topTableValues.show()
@@ -1327,7 +1378,7 @@ class ItemSelector(QWidget):
 
         self.tableCurlMB.show()
         #self.clear_central_widget()
-        # Можно добавить что-то новое
+        # Можно добавить что-то новое'''
         label = QPushButton("Это страница кнопки 2 (назад)")
         label.clicked.connect(self.init_buttons)
         self.layout.addWidget(label)
@@ -1443,7 +1494,7 @@ class ItemSelector(QWidget):
     def create_dialog(self, title, text, item_text, header_text=""):
         dialog = QDialog(self)
         
-        if "Server_Board" in title or "Server_Board" == title:
+        if "AQC621AB Motherboard" in title or "AQC621AB Motherboard" == title:
             title = "AQC621AB Motherboard"
         dialog.setWindowTitle(title)
         layout = QVBoxLayout(dialog)
@@ -1690,8 +1741,24 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Состав оборудования")
-        self.setGeometry(0, 0, 2100, 1800)
-        self.setFixedSize(2100, 1800)
+        
+        # Получаем объект экрана
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.availableGeometry()
+
+        screen_width = screen_geometry.width()
+        screen_height = screen_geometry.height()
+
+        # Размеры окна: 80% от ширины и высоты экрана
+        window_width = int(screen_width * 0.85)
+        window_height = int(screen_height * 0.85)
+
+        # Центрируем окно
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+
+        self.setGeometry(x, y, window_width, window_height)
+        self.setFixedSize(window_width, window_height)
 
         self.layout = QVBoxLayout(self)
         self.stack = QStackedLayout()
@@ -1789,7 +1856,7 @@ class App(QWidget):
         elif ip_combo_value.strip() and ip_combo_value != "Выбрать IP":
             ipAddr = ip_combo_value
         else:
-            ipAddr = "172.26.24.14"
+            ipAddr = "172.26.24.31"
 
         self.label.setText(f"Используется IP: {ipAddr}")
         StartProgramm(ipAddr)
