@@ -1005,13 +1005,29 @@ class ItemSelector(QWidget):
                 left = key.strip()
                 right = ""
 
+            # === Подготовка значения ===
+            if row < len(filtered_keys) - 3:
+                # Только для всех, кроме последних трёх
+                right_cleaned = right.replace(",", "").strip()
+                try:
+                    value_bib = float(right_cleaned)
+                    value_mib = round(value_bib / (1024*1024), 2)
+                    right_display = f"{value_mib} MiB"
+                except ValueError:
+                    right_display = right  # если не число — оставить как есть
+            else:
+                # Последние 3 строки — без изменений (но без запятых)
+                right_display = right.replace(",", "").strip()
+
+            # === Создание ячеек ===
             item_left = QTableWidgetItem(left)
-            item_right = QTableWidgetItem(right)
+            item_right = QTableWidgetItem(right_display)
             item_left.setFont(font)
             item_right.setFont(font)
 
             self.tableCurlMB.setItem(row, 0, item_left)
             self.tableCurlMB.setItem(row, 1, item_right)
+
 
             # === Ширина текста ===
             width_left = metrics.horizontalAdvance(left) + 16   # немного отступов
@@ -1027,15 +1043,107 @@ class ItemSelector(QWidget):
         # === Устанавливаем минимальные размеры ===
         for col, width in enumerate(min_col_widths):
             self.tableCurlMB.setColumnWidth(col, width)
-            self.tableCurlMB.setMinimumWidth(sum(min_col_widths) + 20)  # общий минимум ширины таблицы
+            self.tableCurlMB.setMaximumWidth(sum(min_col_widths) + 40)  # общий минимум ширины таблицы
 
         for row, height in enumerate(min_row_heights):
             self.tableCurlMB.setRowHeight(row, height)
 
-        self.tableCurlMB.setMinimumHeight(sum(min_row_heights) + 80)  # минимум по высоте таблицы
-
-       
+        self.tableCurlMB.setMaximumHeight(sum(min_row_heights) + 120)  # минимум по высоте таблицы
+        # Автоматическое расширение второго столбца (столбец значений)
+        header = self.tableCurlMB.horizontalHeader()
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         
+        
+        ip_select = ip
+        self.top_strings_button = QPushButton("TopStringsValues", self)
+        self.top_strings_button.clicked.connect(lambda: self.TopStringsValue(ip_select))
+        
+        # Создаём таблицу
+        self.topTableValues = QTableWidget(self)
+        self.topTableValues.setColumnCount(3)
+        self.topTableValues.setHorizontalHeaderLabels(["Колонка 1", "Колонка 2", "Колонка 3"])
+
+        # Уменьшенный шрифт
+        font = QFont("Courier New", 10)
+        font.setPointSizeF(font.pointSizeF() * 0.8)
+        self.topTableValues.setFont(font)
+
+        # Пример данных
+        data = []
+
+        self.topTableValues.setRowCount(len(data))
+
+        # Шрифт для измерения ширины текста
+        font_metrics = QFontMetrics(font)
+        max_width = 0
+
+        for row, row_data in enumerate(data):
+            for col, value in enumerate(row_data):
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+                # Отключить перенос строк
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)  # опционально — запрет редактирования
+                self.topTableValues.setItem(row, col, item)
+
+                # Определить ширину текста в 3-м столбце
+                if col == 2:
+                    text_width = font_metrics.horizontalAdvance(value)
+                    if text_width > max_width:
+                        max_width = text_width
+
+        # Установить ширину 3-го столбца вручную с отступом
+        padding = 10
+        self.topTableValues.setColumnWidth(2, max_width + padding)
+
+        # Остальные столбцы — по содержимому
+        self.topTableValues.resizeColumnsToContents()
+        self.topTableValues.resizeRowsToContents()
+
+        # Отключить перенос текста
+        self.topTableValues.setWordWrap(False)
+        CurlManufacturer = str('''curl -s -k -u root:0penBmc -L https://'''+ip+'''/redfish/v1/Systems/system | grep -E '"Model"|"UUID"|"SerialNumber"|"Manufacturer"' ''')
+        ManufacturerValue = os.popen(CurlManufacturer).read() 
+        print(ManufacturerValue)
+        # Создаём таблицу с нужным названием
+        
+        self.Manufacturertable = QTableWidget()
+        self.Manufacturertable.setColumnCount(2)
+        self.Manufacturertable.setHorizontalHeaderLabels(["Поле", "Значение"])
+
+        # Пробуем распарсить JSON, иначе вручную разбираем строки
+        try:
+            data = json.loads(ManufacturerValue)
+        except json.JSONDecodeError:
+            # Преобразуем строки вручную в словарь
+            data = {}
+            for line in ManufacturerValue.strip().split('\n'):
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    key = key.strip().strip('"')
+                    value = value.strip().strip('",')
+                    data[key] = value
+
+        # Задаём количество строк
+        self.Manufacturertable.setRowCount(len(data))
+
+        # Заполняем таблицу
+        for row, (key, value) in enumerate(data.items()):
+            self.Manufacturertable.setItem(row, 0, QTableWidgetItem(key))
+            self.Manufacturertable.setItem(row, 1, QTableWidgetItem(value))
+        # Масштабируем текущий шрифт до 80%
+        current_font = self.Manufacturertable.font()
+        original_size = current_font.pointSizeF()
+        scaled_font = QFont(current_font)
+        scaled_font.setPointSizeF(original_size * 0.8)
+        self.Manufacturertable.setFont(scaled_font)
+
+        # Автоматическая подгонка ширины и высоты
+        self.Manufacturertable.resizeColumnsToContents()
+        self.Manufacturertable.horizontalHeader().setStretchLastSection(True)
+        self.Manufacturertable.resizeRowsToContents()
+        self.Manufacturertable.setMaximumWidth(900)
+        self.Manufacturertable.setMaximumHeight(250)
 
 
         self.server_ip = ip
@@ -1043,6 +1151,7 @@ class ItemSelector(QWidget):
         self.ip2_label = QLabel(ip)
         self.ip2_label.setFixedWidth(700)
         self.ip3_label = QLabel("Дисковое пространство")
+        
         self.i1p_label = QLabel()
         self.i1p_label.setCursor(QCursor(Qt.PointingHandCursor))
 
@@ -1090,9 +1199,13 @@ class ItemSelector(QWidget):
         ip_layout.addLayout(self.buttons_layout)
         #ip2_label
         ip_layout.addWidget(self.ip3_label)
+        
         ip_layout.addWidget(self.tableCurlMB)
+        ip_layout.addWidget(self.top_strings_button)
+        ip_layout.addWidget(self.topTableValues)
         ip_layout.addWidget(self.ip2_label)
         ip_layout.addWidget(self.i1p_label)
+        ip_layout.addWidget(self.Manufacturertable)
         left_split.addWidget(ip_section)
 
         # Таблица
@@ -1106,13 +1219,74 @@ class ItemSelector(QWidget):
         main_h_layout.addWidget(self.main_table, 4)
 
         self.list_widget.itemChanged.connect(self.on_item_changed)
+        self.main_table.resizeRowsToContents()
+
+        # Установить ширину столбцов автоматически по содержимому
+        self.main_table.resizeColumnsToContents()
         self.button1.click()
     
+    def TopStringsValue(self, ip_select):
+            print("Функция TopStringsValue вызвана!")
 
+            topSTR = f"sshpass -p 0penBmc ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@{ip_select} 'top -d 5 -n 2 | head -n 14 && exit'"
+            TopSTRValue = os.popen(topSTR).read()
+
+            while "  " in TopSTRValue:
+                TopSTRValue = TopSTRValue.replace("  ", " ")
+            TopSTRValue_sp = TopSTRValue.split("\n")
+            print(TopSTRValue_sp)
+            TopSTRValue_sp = TopSTRValue_sp[4:-1]
+            TopSTRValue_sp = [' '.join(item.split()[5:]) for item in TopSTRValue_sp]
+            TopSTRValue_sp = [
+                s.split(' ', 2)[0] + ' ' + s.split(' ', 2)[2] if s.count(' ') >= 2 else s
+                for s in TopSTRValue_sp
+            ]
+            TopSTRValue_sp = [s.replace(' ', '&', 2) for s in TopSTRValue_sp]
+            TopSTRValue_sp = [
+                s[:s.find('&', s.find('&') + 1) + 1] + s[s.rfind('/') + 1:]
+                if '/' in s and s.count('&') >= 2 else s
+                for s in TopSTRValue_sp
+            ]
+
+            print(TopSTRValue_sp)
+
+            # Обновляем таблицу:
+            self.topTableValues.setRowCount(len(TopSTRValue_sp))
+
+            # Устанавливаем тот же шрифт и измеритель
+            font = self.topTableValues.font()
+            font_metrics = QFontMetrics(font)
+            max_width = 0
+
+            for row, item in enumerate(TopSTRValue_sp):
+                parts = item.split("&")
+                for col in range(3):
+                    value = parts[col] if col < len(parts) else ""
+                    item_widget = QTableWidgetItem(value)
+                    item_widget.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    item_widget.setFlags(item_widget.flags() & ~Qt.ItemIsEditable)
+                    self.topTableValues.setItem(row, col, item_widget)
+
+                    if col == 2:
+                        text_width = font_metrics.horizontalAdvance(value)
+                        max_width = max(max_width, text_width)
+
+            # Применить ширину 3-го столбца
+            self.topTableValues.setColumnWidth(2, max_width + 10)
+
+            # Подогнать строки по содержимому
+            self.topTableValues.resizeRowsToContents()
+
+            
+
+       
 
     def Button1Page(self):
         print("Кнопка 1 нажата")
-        self.ip3_label.hide() #какая то таблица
+        self.ip3_label.hide()
+        self.top_strings_button.hide()
+        self.Manufacturertable.hide()#Manufacturertable
+        self.topTableValues.hide() #какая то таблица topTableValues
         self.ip2_label.show() #ip 10.10.20.20
         self.i1p_label.show() #кнока включение выключения
         #self.ip_section.show() 
@@ -1137,6 +1311,9 @@ class ItemSelector(QWidget):
 
 
         self.ip3_label.show() #какая то таблица
+        self.top_strings_button.show() 
+        self.Manufacturertable.show()
+        self.topTableValues.show()
         self.ip2_label.hide() #ip 10.10.20.20
         self.i1p_label.hide() #кнока включение выключения
         #self.ip_section.hide() 
