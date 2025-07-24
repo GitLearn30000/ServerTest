@@ -1,0 +1,6 @@
+{
+    "CPLD_Firmware": "/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23",
+    "BIOS_Firmware": "/redfish/v1/Systems/system",
+    "BMC_Firmware": "/redfish/v1/Managers/bmc",
+    "IR_AX_HU_Firmware": "/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit"
+} 

@@ -92,7 +92,18 @@ def StartProgramm(ipAddr):
     SENSOR_NAME_LIST = SensorNames
     end_dict = {}
     CurlRequest = "curl -s -k -u root:0penBmc -L https://"
-    Bios_Query = CurlRequest+ipAddr+"/redfish/v1/Systems/system | grep BiosVersion"
+    with open('versions.json', 'r', encoding='utf-8') as fBios:
+        dataBios = json.load(fBios)
+
+    # Извлечение BIOS_Firmware с верхнего уровня
+    bios_firmware = dataBios.get("BIOS_Firmware")
+
+    if bios_firmware is None:
+        print("Ошибка: ключ 'BIOS_Firmware' не найден")
+    else:
+        # Предположим, что CurlRequest и ipAddr — это строки, заданные ранее
+        Bios_Query = CurlRequest + ipAddr + bios_firmware+" | grep BiosVersion"
+        print("Bios_Query:", Bios_Query)
     BiosResultCurl = os.popen(Bios_Query).read()
     print("BiosResultCurl",BiosResultCurl,Bios_Query)
     BiosResultCurl=BiosResultCurl.replace(',\n',"")
@@ -100,12 +111,35 @@ def StartProgramm(ipAddr):
     
     def GetFirmwareVersions(ipAddr):
         #a = datetime.datetime.now()
-        IR_AX_HU_Query = CurlRequest+ipAddr+"/redfish/v1/Chassis/IR_AX_HU_Board/Oem/Aquarius_Irteya/HeatingUnit  | grep FirmwareVersion"
         
-        CPLD_Query = CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version"
+        with open('versions.json', 'r', encoding='utf-8') as f_cpld:
+            data_cpld = json.load(f_cpld)
+
+        cpld_firmware = data_cpld.get("CPLD_Firmware")
+
+        if cpld_firmware:
+            CPLD_Query = CurlRequest+ipAddr+cpld_firmware+" | grep Version"
+            print("CPLD_Firmware:", CPLD_Query)
+        else:
+            print("CPLD_Firmware отсутствует или пуст")
+        #CPLD_Query = CurlRequest+ipAddr+"/redfish/v1/UpdateService/FirmwareInventory/cpld_9_23 | grep Version"
         
         
         CPLD_ResultCurl = os.popen(CPLD_Query).read()
+
+
+        with open('versions.json', 'r', encoding='utf-8') as f_ir:
+            data_ir = json.load(f_ir)
+
+        ir_firmware = data_ir.get("IR_AX_HU_Firmware")
+
+        if ir_firmware:
+            IR_AX_HU_Query = CurlRequest+ipAddr+ir_firmware+"  | grep FirmwareVersion"
+            print("IR_AX_HU_Firmware:", IR_AX_HU_Query)
+        else:
+            print("IR_AX_HU_Firmware отсутствует или пуст")
+
+        
         IR_AX_HU_ResultCurl = os.popen(IR_AX_HU_Query).read()
         
         print("IR_AX_HU_ResultCurl",IR_AX_HU_ResultCurl,IR_AX_HU_Query)
@@ -579,13 +613,23 @@ def StartProgramm(ipAddr):
     print(sshConnectionString+ipAddr+" busctl introspect ru.aq.Irteya.HeatingUnit /xyz/openbmc_project/heaters/_81_16 | grep "+'"'+"Humidity "+'"'+" >> Extra.txt && echo ------- >> Extra.txt")
     #BoardsDataList = []
     
-    DebugQuery3 = CurlRequest+ipAddr+"/redfish/v1/Managers/bmc | grep FirmwareVersion"
-    resultDebug3 = os.popen(DebugQuery3).read()
-    print("resultDebug3",resultDebug3,DebugQuery3)
-    DebugQuery3=DebugQuery3.replace(',\n',"")
-    if len(resultDebug3) >= 3:
+    with open('versions.json', 'r', encoding='utf-8') as f_bmc:
+        data_bmc = json.load(f_bmc)
+
+    bmc_firmware = data_bmc.get("BMC_Firmware")
+
+    if bmc_firmware:
+        BmcQuery = CurlRequest+ipAddr+bmc_firmware+" | grep FirmwareVersion"
+        print("BMC_Firmware:", BmcQuery)
+    else:
+        print("BMC_Firmware отсутствует или пуст")
+    
+    BmcResult = os.popen(BmcQuery).read()
+    print("BmcResult",BmcResult,BmcQuery)
+    BmcQuery=BmcQuery.replace(',\n',"")
+    if len(BmcResult) >= 3:
         
-        information_SP = [resultDebug3] + information_SP
+        information_SP = [BmcResult] + information_SP
     
     if len(BiosResultCurl) >= 3:
         
@@ -661,6 +705,11 @@ class ItemSelector(QWidget):
         
         # Список с галочками
         self.list_widget = QListWidget(self)
+        font = self.list_widget.font()
+        original_size_list_widget = font.pointSizeF()
+        font.setPointSizeF(original_size_list_widget * 0.8)
+        self.list_widget.setFont(font)
+
         for item in self.items:
             list_item = QListWidgetItem(item)
 
@@ -829,66 +878,65 @@ class ItemSelector(QWidget):
 
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
-        self.firmware_label = QLabel("firmware")
+        self.firmware_label = QLabel("Firmware")
         ip_layout.addWidget(self.firmware_label)
         
-        if len(ResolveErrors)>=1:
+        if len(ResolveErrors) >= 1:
             if "" == "":
-                
-                font_scale = 0.75
-            
-                print("ResolveErrors: ",ResolveErrors)
+                font_scale = 0.65
 
-                # Таблица
+                print("ResolveErrors: ", ResolveErrors)
+
+                # Отфильтруем ошибки, исключая строки с "AQFPB_FFC"
+                filtered_errors = [item for item in ResolveErrors if '":' in item and "AQFPB_FFC" not in item]
+
+                # Создаём таблицу
                 self.version_table = QTableWidget()
-                self.version_table.setRowCount(len(ResolveErrors))
+                self.version_table.setRowCount(len(filtered_errors))
                 self.version_table.setColumnCount(2)
                 self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
 
-                # Применение масштабированного шрифта
+                # Масштабируем шрифт
                 base_font = self.version_table.font()
                 new_font = QFont(base_font)
                 new_font.setPointSizeF(base_font.pointSizeF() * font_scale)
                 self.version_table.setFont(new_font)
 
-                # Заполнение таблицы
-                for row, item in enumerate(ResolveErrors):
-                    if '":' in item:
-                        try:
-                            name, version = item.split('":')
-                            name = name.strip().strip('"')
-                            version = version.strip().strip('" ')
-                            self.version_table.setItem(row, 0, QTableWidgetItem(name))
-                            self.version_table.setItem(row, 1, QTableWidgetItem(version))
-                        except Exception as e:
-                            print("")#print(f"Ошибка при разборе строки: {item}", e)
+                # Заполняем таблицу
+                for row_index, item in enumerate(filtered_errors):
+                    try:
+                        name, version = item.split('":')
+                        name = name.strip().strip('"')
+                        version = version.strip().strip('" ')
+                        self.version_table.setItem(row_index, 0, QTableWidgetItem(name))
+                        self.version_table.setItem(row_index, 1, QTableWidgetItem(version))
+                    except Exception as e:
+                        print("")  # Можно добавить лог, если нужно
 
-                # Размер по содержимому ячеек
+                # Подгоняем размеры по содержимому
                 self.version_table.resizeColumnsToContents()
                 self.version_table.resizeRowsToContents()
 
-                # Суммируем ширину всех колонок
+                # Вычисляем ширину
                 total_width = sum([self.version_table.columnWidth(col) for col in range(self.version_table.columnCount())])
-
-                # Добавим ширину вертикального заголовка
                 total_width += self.version_table.verticalHeader().width()
-
-                # Добавим ширину рамки (scrollbar + рамки виджета)
                 total_width += 4  # небольшой запас
 
-                # Аналогично для высоты
+                # Вычисляем высоту
                 total_height = sum([self.version_table.rowHeight(row) for row in range(self.version_table.rowCount())])
                 total_height += self.version_table.horizontalHeader().height()
                 total_height += 4  # запас
 
-                # Установка финального размера
+                # Устанавливаем размеры таблицы
                 self.version_table.setMinimumSize(total_width, total_height)
                 self.version_table.setMaximumSize(total_width, total_height)
+                self.version_table.setMinimumWidth(750)
 
+                # Добавляем таблицу в layout
                 ip_layout.addWidget(self.version_table)
-    
+
         #ip_layout.setContentsMargins(0, 0, 0, 0)
-        self.hardware_label = QLabel("hardware")
+        self.hardware_label = QLabel("Hardware")
 
 
         ip_layout.addWidget(self.hardware_label)
@@ -900,7 +948,7 @@ class ItemSelector(QWidget):
         if len(from_revision)>=1:
             if "" == "":
                 
-                font_scale = 0.75
+                font_scale = 0.65
             
                 print("from_revision: ",from_revision)
 
@@ -958,6 +1006,7 @@ class ItemSelector(QWidget):
                 # Установка финального размера
                 self.version_table2.setMinimumSize(total_width, total_height)
                 self.version_table2.setMaximumSize(total_width, total_height)
+                self.version_table2.setMinimumWidth(750)
 
 
                 # Добавление в layout
@@ -1006,7 +1055,7 @@ class ItemSelector(QWidget):
                 print(f"{key} : {value}")
         filtered_keys = [key for key, value in options_dict.items() if "CurlMB" in value]
         # === Настройки ===
-        ScaleCurlMB = 0.8             # масштаб
+        ScaleCurlMB = 0.65             # масштаб
         base_font_size = 10
         scaled_font_size = max(1, int(base_font_size * ScaleCurlMB))  # чтобы не стало 0
 
@@ -1081,6 +1130,8 @@ class ItemSelector(QWidget):
         # Автоматическое расширение второго столбца (столбец значений)
         header = self.tableCurlMB.horizontalHeader()
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tableCurlMB.setMinimumWidth(600)
+        self.tableCurlMB.setMinimumHeight(370)
         
         
         ip_select = ip
@@ -1128,6 +1179,7 @@ class ItemSelector(QWidget):
         # Остальные столбцы — по содержимому
         self.topTableValues.resizeColumnsToContents()
         self.topTableValues.resizeRowsToContents()
+        
 
         # Отключить перенос текста
         self.topTableValues.setWordWrap(False)
@@ -1164,7 +1216,7 @@ class ItemSelector(QWidget):
         current_font = self.Manufacturertable.font()
         original_size = current_font.pointSizeF()
         scaled_font = QFont(current_font)
-        scaled_font.setPointSizeF(original_size * 0.8)
+        scaled_font.setPointSizeF(original_size * 0.63)
         self.Manufacturertable.setFont(scaled_font)
 
         # Автоматическая подгонка ширины и высоты
@@ -1178,7 +1230,7 @@ class ItemSelector(QWidget):
         self.server_ip = ip
         self.current_status = 'on' if status == 'SERVER is on' else 'off'
         self.ip2_label = QLabel(ip)
-        self.ip2_label.setFixedWidth(700)
+        self.ip2_label.setFixedWidth(1500)
         self.ip3_label = QLabel("Дисковое пространство")
         
         self.i1p_label = QLabel()
@@ -1230,9 +1282,10 @@ class ItemSelector(QWidget):
         ip_layout.addWidget(self.ip3_label)
         
         ip_layout.addWidget(self.tableCurlMB)
-        self.server_information = QLabel("server_information")
+        self.server_information = QLabel("Server information")
         ip_layout.addWidget(self.server_information)
         ip_layout.addWidget(self.Manufacturertable)
+        
                 # Горизонтальный лейаут для firmware
         CurlMB_layout = QVBoxLayout()
         CurlMB_layout.addWidget(self.ip3_label)
@@ -1262,7 +1315,7 @@ class ItemSelector(QWidget):
         # Таблица
         self.main_table = QTableWidget(self)
         self.main_table.setColumnCount(4)
-        self.main_table.setHorizontalHeaderLabels(["Sensor", "RedFish", "D-Bus", "Ipmitool"])
+        self.main_table.setHorizontalHeaderLabels(["Sensor", "RedFish", "D-Bus", "IPMI"])
         font = QFont("Courier New", 10)
         font.setPointSizeF(font.pointSizeF() * 0.8)
         self.main_table.setFont(font)
@@ -1275,6 +1328,25 @@ class ItemSelector(QWidget):
         # Установить ширину столбцов автоматически по содержимому
         self.main_table.resizeColumnsToContents()
         self.button1.click()
+        self.top_strings_button.click()
+
+        screen = QApplication.primaryScreen()
+        size = screen.size()
+        width = size.width()
+        height = size.height()
+
+        if width >= 3840:
+            screen_type = "4K или выше"
+        elif width >= 2560:
+            screen_type = "2K"
+        elif width >= 1280:
+            screen_type = "1K"
+        else:
+            screen_type = "Низкое разрешение / нестандартное"
+
+        print(f"Разрешение экрана: {width} x {height}")
+        print(f"Тип экрана: {screen_type}")
+
     
     def TopStringsValue(self, ip_select):
             print("Функция TopStringsValue вызвана!")
@@ -1323,10 +1395,13 @@ class ItemSelector(QWidget):
                         max_width = max(max_width, text_width)
 
             # Применить ширину 3-го столбца
-            self.topTableValues.setColumnWidth(2, max_width + 10)
+            self.topTableValues.setColumnWidth(2, max_width + 600)
+
+
 
             # Подогнать строки по содержимому
             self.topTableValues.resizeRowsToContents()
+            self.topTableValues.setMinimumHeight(475)
 
             
 
@@ -1615,7 +1690,7 @@ class ItemSelector(QWidget):
 
         sensor_table = QTableWidget()
         sensor_table.setColumnCount(4)
-        sensor_table.setHorizontalHeaderLabels(["Sensor", "RedFish", "D-Bus", "Ipmitool"])
+        sensor_table.setHorizontalHeaderLabels(["Sensor", "RedFish", "D-Bus", "IPMI"])
 
         sensor_font = QFont("Courier New", 9)
         sensor_table.setFont(sensor_font)
@@ -1751,7 +1826,7 @@ class App(QWidget):
 
         # Размеры окна: 80% от ширины и высоты экрана
         window_width = int(screen_width * 0.85)
-        window_height = int(screen_height * 0.85)
+        window_height = int(screen_height * 0.9)
 
         # Центрируем окно
         x = (screen_width - window_width) // 2
@@ -1863,13 +1938,13 @@ class App(QWidget):
 
     def turn_on(self, ip_input_value):
         global ipAddr
-        ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.14"
+        ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.31"
         print("")#print("Выключение устройства")
         os.system(sshConnectionString+ipAddr+" ipmitool power on")
 
     def turn_off(self, ip_input_value):
         global ipAddr
-        ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.14"
+        ipAddr = ip_input_value.strip() if ip_input_value.strip() else "172.26.24.31"
         print("")#print("Выключение устройства")
         os.system(sshConnectionString+ipAddr+" ipmitool power off")
 
@@ -1913,7 +1988,7 @@ def ProgressbarSrceenON():
     ProgressbarSrceenOFF()
 
     # === Встроенный массив подписей ===
-    progress_texts = ["Очистка Системы", "Получение состаяния сервера", "Получение ID и TOKEN", "Получение нформации по HU", "Получение firmware и hardware", "Получение названий плат", "Получение данных по платам","Получение нформации по Ipmi", "Получение информации по BUCSTL", "Получение информации по RedFish",  "Готово"]
+    progress_texts = ["Очистка системы", "состаяния питания", "Получение Session ID и Session TOKEN", "Получение информации по датчикам грелки", "Получение версий Firmware и Hardware", "Получение информации по установленным платам", "Получение данных FRU установленных плат","Получение информации по датчикам через Ipmi", "Получение информации по датчикам через BUCSTL", "Получение информации по датчикам через RedFish",  "Готово"]
 
     # Создаём затемнение
     overlay_widget = QWidget(main_window)
