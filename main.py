@@ -878,8 +878,8 @@ class ItemSelector(QWidget):
 
         ip_section = QWidget()
         ip_layout = QVBoxLayout(ip_section)
-        self.firmware_label = QLabel("Firmware")
-        ip_layout.addWidget(self.firmware_label)
+        #self.firmware_label = QLabel("Firmware")
+        #ip_layout.addWidget(self.firmware_label)
         
         if len(ResolveErrors) >= 1:
             if "" == "":
@@ -894,7 +894,7 @@ class ItemSelector(QWidget):
                 self.version_table = QTableWidget()
                 self.version_table.setRowCount(len(filtered_errors))
                 self.version_table.setColumnCount(2)
-                self.version_table.setHorizontalHeaderLabels(["Название", "Версия"])
+                self.version_table.setHorizontalHeaderLabels(["Firmware", "Версия"])
 
                 # Масштабируем шрифт
                 base_font = self.version_table.font()
@@ -936,10 +936,10 @@ class ItemSelector(QWidget):
                 ip_layout.addWidget(self.version_table)
 
         #ip_layout.setContentsMargins(0, 0, 0, 0)
-        self.hardware_label = QLabel("Hardware")
+        #self.hardware_label = QLabel("Hardware")
 
 
-        ip_layout.addWidget(self.hardware_label)
+        #ip_layout.addWidget(self.hardware_label)
 
 
 
@@ -956,7 +956,7 @@ class ItemSelector(QWidget):
                 self.version_table2 = QTableWidget()
                 self.version_table2.setRowCount(len(from_revision))
                 self.version_table2.setColumnCount(2)
-                self.version_table2.setHorizontalHeaderLabels(["Название", "Версия"])
+                self.version_table2.setHorizontalHeaderLabels(["Hardware", "Версия"])
 
                 # Применение масштабированного шрифта
                 base_font = self.version_table2.font()
@@ -1014,13 +1014,13 @@ class ItemSelector(QWidget):
         
         # Горизонтальный лейаут для firmware
         firmware_layout = QVBoxLayout()
-        firmware_layout.addWidget(self.firmware_label)
+        #firmware_layout.addWidget(self.firmware_label)
         firmware_layout.addWidget(self.version_table)
         
 
         # Горизонтальный лейаут для hardware
         hardware_layout = QVBoxLayout()
-        hardware_layout.addWidget(self.hardware_label)
+        #hardware_layout.addWidget(self.hardware_label)
         hardware_layout.addWidget(self.version_table2)
         
 
@@ -1030,7 +1030,7 @@ class ItemSelector(QWidget):
         combined_layout.addLayout(hardware_layout)
 
         # Добавляем в ip_layout (предположим, это тоже QVBoxLayout)
-        ip_layout.addLayout(combined_layout)
+        
         
 
         self.buttons_layout = QHBoxLayout()
@@ -1066,7 +1066,7 @@ class ItemSelector(QWidget):
 
         # Создание таблицы
         self.tableCurlMB = QTableWidget(len(filtered_keys), 2)
-        self.tableCurlMB.setHorizontalHeaderLabels(["Название", "Значение"])
+        self.tableCurlMB.setHorizontalHeaderLabels(["Пространство", "Значение"])
         self.tableCurlMB.setFont(font)
 
         # Определим минимальные ширины и высоты
@@ -1224,14 +1224,14 @@ class ItemSelector(QWidget):
         self.Manufacturertable.horizontalHeader().setStretchLastSection(True)
         self.Manufacturertable.resizeRowsToContents()
         self.Manufacturertable.setMaximumWidth(900)
-        self.Manufacturertable.setMaximumHeight(250)
+        self.Manufacturertable.setMaximumHeight(200)
 
 
         self.server_ip = ip
         self.current_status = 'on' if status == 'SERVER is on' else 'off'
         self.ip2_label = QLabel(ip)
-        self.ip2_label.setFixedWidth(1500)
-        self.ip3_label = QLabel("Дисковое пространство")
+        self.ip2_label.setFixedWidth(1100)
+        self.ip3_label = QLabel(" ")
         
         self.i1p_label = QLabel()
         self.i1p_label.setCursor(QCursor(Qt.PointingHandCursor))
@@ -1279,36 +1279,61 @@ class ItemSelector(QWidget):
 
         ip_layout.addLayout(self.buttons_layout)
         #ip2_label
-        ip_layout.addWidget(self.ip3_label)
+        #ip_layout.addWidget(self.ip3_label)
+        Up_layout = QVBoxLayout()
+        #CurlMB_layout.addWidget(self.ip3_label)
+        Up_layout.addWidget(self.ip2_label)
+        self.i1p_label.setFixedHeight(60)
+        Up_layout.addWidget(self.i1p_label)
+        Up_layout.addWidget(self.top_strings_button)
+        Left_layout = QVBoxLayout()
+        self.list_widget.setFixedWidth(400)
+        self.list_widget.setFixedHeight(320)
+        Left_layout.addWidget(self.list_widget)
+        #CurlMB_layout.addWidget(self.ip3_label)
+        all_UP_RIGHT_layout = QHBoxLayout()
+        all_UP_RIGHT_layout.addLayout(Left_layout)
+        all_UP_RIGHT_layout.addLayout(Up_layout)
+        
+        
+        ip_layout.addLayout(all_UP_RIGHT_layout)
+        ip_layout.addLayout(combined_layout)
+        
         
         ip_layout.addWidget(self.tableCurlMB)
         self.server_information = QLabel("Server information")
-        ip_layout.addWidget(self.server_information)
-        ip_layout.addWidget(self.Manufacturertable)
+        #ip_layout.addWidget(self.server_information)
+        #ip_layout.addWidget(self.Manufacturertable)
         
                 # Горизонтальный лейаут для firmware
         CurlMB_layout = QVBoxLayout()
+        
         CurlMB_layout.addWidget(self.ip3_label)
         CurlMB_layout.addWidget(self.tableCurlMB)
+        
         
 
         # Горизонтальный лейаут для hardware
         Manufacture_layout = QVBoxLayout()
+        
         Manufacture_layout.addWidget(self.server_information)
         Manufacture_layout.addWidget(self.Manufacturertable)
+
         
 
         # Общий вертикальный лейаут
         CurlMBandManufacture_layout = QHBoxLayout()
-        CurlMBandManufacture_layout.addLayout(CurlMB_layout)
         CurlMBandManufacture_layout.addLayout(Manufacture_layout)
+        CurlMBandManufacture_layout.addLayout(CurlMB_layout)
+        #ip_layout.addWidget(self.server_information)
+
 
         # Добавляем в ip_layout (предположим, это тоже QVBoxLayout)
         ip_layout.addLayout(CurlMBandManufacture_layout)
-        ip_layout.addWidget(self.top_strings_button)
+        #ip_layout.addWidget(self.top_strings_button)
         ip_layout.addWidget(self.topTableValues)
-        ip_layout.addWidget(self.ip2_label)
-        ip_layout.addWidget(self.i1p_label)
+        #ip_layout.addWidget(self.ip2_label)
+        #ip_layout.addWidget(self.i1p_label)
         
         left_split.addWidget(ip_section)
 
@@ -1346,6 +1371,7 @@ class ItemSelector(QWidget):
 
         print(f"Разрешение экрана: {width} x {height}")
         print(f"Тип экрана: {screen_type}")
+
 
     
     def TopStringsValue(self, ip_select):
@@ -1988,7 +2014,7 @@ def ProgressbarSrceenON():
     ProgressbarSrceenOFF()
 
     # === Встроенный массив подписей ===
-    progress_texts = ["Очистка системы", "состаяния питания", "Получение Session ID и Session TOKEN", "Получение информации по датчикам грелки", "Получение версий Firmware и Hardware", "Получение информации по установленным платам", "Получение данных FRU установленных плат","Получение информации по датчикам через Ipmi", "Получение информации по датчикам через BUCSTL", "Получение информации по датчикам через RedFish",  "Готово"]
+    progress_texts = ["Очистка системы", "состаяния питания", "Получение Session ID и Session TOKEN", "Получение информации по датчикам грелки", "Получение версий Firmware и Hardware", "Получение информации по установленным платам", "Получение данных FRU установленных плат","Получение информации по датчикам через IPMI", "Получение информации по датчикам через DBUS", "Получение информации по датчикам через Redfish",  "Готово"]
 
     # Создаём затемнение
     overlay_widget = QWidget(main_window)
